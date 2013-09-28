@@ -1,9 +1,24 @@
 <?php 
 	/* 
-	 *  Twisto real-time API v0.1
-	 *  (c) outa[dev] 2013
+	 *  Twisto real-time API
+	 *  Copyright (C) outa[dev] 2013
 	 *
 	 *  timeo.php
+	 *
+	 *
+	 *	This program is free software: you can redistribute it and/or modify
+	 *  it under the terms of the GNU General Public License as published by
+	 *  the Free Software Foundation, either version 3 of the License, or
+	 *  (at your option) any later version.
+	 *
+	 *  This program is distributed in the hope that it will be useful,
+	 *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+	 *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	 *  GNU General Public License for more details.
+	 *
+	 *  You should have received a copy of the GNU General Public License
+	 *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	 *   
 	 */
 
 	define('API_BASE_URL', 'http://dev.actigraph.fr/actipages/twisto/module/mobile/pivk/relais.html.php');
