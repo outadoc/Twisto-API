@@ -21,7 +21,7 @@ Le résultat est renvoyé sous forme d'un string JSON.
 
 	twisto-api.php?func=getLines
 
-/Exemple de résultat/ :
+*Exemple de résultat* :
 
 ```json
 [
@@ -50,7 +50,7 @@ L'identifiant obtenu pour chaque ligne pourra servir pour les autres fonctions d
 
 ...où XX est l'identifiant de la ligne.
 
-/Exemple de résultat/ :
+*Exemple de résultat* :
 
 ```json
 [
@@ -69,7 +69,7 @@ L'identifiant est A pour "aller", ou R pour "retour".
 
 ...où XX est l'identifiant de la ligne, et la direction est A ou R.
 
-/Exemple de résultat/ :
+*Exemple de résultat* :
 
 ```json
 [
@@ -98,7 +98,7 @@ L'identifiant est A pour "aller", ou R pour "retour".
 
 ...où XX est l'identifiant de la ligne, la direction est A ou R et XXXX est l'identifiant de l'arrêt.
 
-/Exemple de résultat/ :
+*Exemple de résultat* :
 
 ```json
 [
@@ -121,11 +121,11 @@ L'identifiant est A pour "aller", ou R pour "retour".
 Pour cela, on envoie directement un cookie (le même que celui utilisé par le système officiel).  
 Le cookie est de la forme `ARRÊT|LIGNE|DIRECTION;ARRÊT|LIGNE|DIRECTION;...`, avec les pipes et points-virgules bien évidemment URLencoded.
 
-/Exemple de requête/ :
+*Exemple de requête* :
 
 	twisto-api.php?func=getSchedule&data=5421%7C11%7CA%3B12%7C11%7CR%3B251%7C3%7CA
 
-/Exemple de résultat/ :
+*Exemple de résultat* :
 
 ```json
 [
@@ -160,7 +160,7 @@ Le cookie est de la forme `ARRÊT|LIGNE|DIRECTION;ARRÊT|LIGNE|DIRECTION;...`, a
 
 Si une erreur survient durant l'exécution du script, un message d'erreur devrait être inclus dans le JSON retourné.
 
-/Exemple/ :
+*Exemple* :
 
 ```json
 {"error":"Could not resolve host: dev.actigraph.fr; nodename nor servname provided, or not known"}
