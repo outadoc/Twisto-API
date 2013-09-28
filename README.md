@@ -23,20 +23,22 @@ Le résultat est renvoyé sous forme d'un string JSON.
 
 Exemple de résultat :
 
-	[
-		{"id":"TRAM","name":"TRAM"},
-		{"id":"1","name":"Lianes 1"},
-		{"id":"2","name":"Lianes 2"},
-		{"id":"3","name":"Lianes 3"},
-		{"id":"4","name":"Lianes 4"},
-		{"id":"5","name":"Ligne 5"},
-		{"id":"6","name":"Ligne 6"},
-		{"id":"7","name":"Ligne 7"},
-		{"id":"8","name":"Ligne 8"},
-		{"id":"9","name":"Ligne 9"},
-		...
-		{"id":"NUIT","name":"Ligne Noctibus"}
-	]
+```json
+[
+	{"id":"TRAM","name":"TRAM"},
+	{"id":"1","name":"Lianes 1"},
+	{"id":"2","name":"Lianes 2"},
+	{"id":"3","name":"Lianes 3"},
+	{"id":"4","name":"Lianes 4"},
+	{"id":"5","name":"Ligne 5"},
+	{"id":"6","name":"Ligne 6"},
+	{"id":"7","name":"Ligne 7"},
+	{"id":"8","name":"Ligne 8"},
+	{"id":"9","name":"Ligne 9"},
+	...
+	{"id":"NUIT","name":"Ligne Noctibus"}
+]
+```
 
 L'identifiant obtenu pour chaque ligne pourra servir pour les autres fonctions du script.
 
@@ -50,10 +52,12 @@ L'identifiant obtenu pour chaque ligne pourra servir pour les autres fonctions d
 
 Exemple de résultat :
 
-	[
-		{"id":"A","name":"Cuverville mairie"},
-		{"id":"R","name":"Bretteville l'enclos"}
-	]
+```json
+[
+	{"id":"A","name":"Cuverville mairie"},
+	{"id":"R","name":"Bretteville l'enclos"}
+]
+```
 
 L'identifiant est A pour "aller", ou R pour "retour".
 
@@ -67,22 +71,24 @@ L'identifiant est A pour "aller", ou R pour "retour".
 
 Exemple de résultat :
 
-	[
-		{"id":"5421","name":"50 acres"},
-		{"id":"11","name":"Bibliotheque"},
-		{"id":"4072","name":"Bois claquet"},
-		{"id":"4082","name":"Briere"},
-		{"id":"3532","name":"Carrefour de la liberte"},
-		{"id":"4112","name":"Charmettes"},
-		{"id":"4122","name":"Clair soleil"},
-		{"id":"511","name":"Creux au renard"},
-		{"id":"1892","name":"Demi-lune"},
-		{"id":"121","name":"Demoge"},
-		{"id":"2052","name":"Edmond rostand"},
-		{"id":"5461","name":"Eglise de bretteville"},
-		...
-		{"id":"4392","name":"Vallee barrey"}
-	]
+```json
+[
+	{"id":"5421","name":"50 acres"},
+	{"id":"11","name":"Bibliotheque"},
+	{"id":"4072","name":"Bois claquet"},
+	{"id":"4082","name":"Briere"},
+	{"id":"3532","name":"Carrefour de la liberte"},
+	{"id":"4112","name":"Charmettes"},
+	{"id":"4122","name":"Clair soleil"},
+	{"id":"511","name":"Creux au renard"},
+	{"id":"1892","name":"Demi-lune"},
+	{"id":"121","name":"Demoge"},
+	{"id":"2052","name":"Edmond rostand"},
+	{"id":"5461","name":"Eglise de bretteville"},
+	...
+	{"id":"4392","name":"Vallee barrey"}
+]
+```
 
 ----------------------------------------
 
@@ -94,17 +100,19 @@ Exemple de résultat :
 
 Exemple de résultat :
 
-	[
-		{
-			"line":"Ligne 11",
-			"direction":"Cuverville mairie",
-			"stop":"Arrêt 50 acres",
-			"next":[
-				"Dans 15 minutes", 
-				"Dans 35 minutes"
-			]
-		}
-	]
+```json
+[
+	{
+		"line":"Ligne 11",
+		"direction":"Cuverville mairie",
+		"stop":"Arrêt 50 acres",
+		"next":[
+			"Dans 15 minutes", 
+			"Dans 35 minutes"
+		]
+	}
+]
+```
 
 ----------------------------------------
 
@@ -119,29 +127,31 @@ Exemple de requête :
 
 Exemple de résultat :
 
-	[
-		{
-			"line":"Ligne 11",
-			"direction":"Cuverville mairie",
-			"stop":"Arrêt 50 acres",
-			"next":[
-				"Dans 15 minutes", 
-				"Dans 35 minutes"
-			]
-		}, {
-			"line":"Ligne 11",
-			"direction":"Bretteville l'enclos",
-			"stop":"Arrêt Bibliotheque",
-			"next":[
-				"Dans 3 minutes", 
-				"Dans 25 minutes"
-			]
-		}, {
-			"line":"Lianes 3",
-			"direction":"Herouville st-clair",
-			"stop":"Arrêt Bicoquet",
-			"next": [
-				"À 0 H 25"
-			]
-		}
-	]
+```json
+[
+	{
+		"line":"Ligne 11",
+		"direction":"Cuverville mairie",
+		"stop":"Arrêt 50 acres",
+		"next":[
+			"Dans 15 minutes", 
+			"Dans 35 minutes"
+		]
+	}, {
+		"line":"Ligne 11",
+		"direction":"Bretteville l'enclos",
+		"stop":"Arrêt Bibliotheque",
+		"next":[
+			"Dans 3 minutes", 
+			"Dans 25 minutes"
+		]
+	}, {
+		"line":"Lianes 3",
+		"direction":"Herouville st-clair",
+		"stop":"Arrêt Bicoquet",
+		"next": [
+			"À 0 H 25"
+		]
+	}
+]
+```
