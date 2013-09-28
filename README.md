@@ -155,3 +155,13 @@ Exemple de résultat :
 	}
 ]
 ```
+
+### Gestion des erreurs
+
+Si une erreur survient durant l'exécution du script, un message d'erreur devrait être inclus dans le JSON retourné.
+
+Exemple :
+
+```json
+{"error":"Could not resolve host: dev.actigraph.fr; nodename nor servname provided, or not known"}
+```

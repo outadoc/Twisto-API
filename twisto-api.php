@@ -35,6 +35,10 @@
 
 		$server_output = curl_exec($ch);
 
+		if($server_output == false) {
+			throwError(curl_error($ch));
+		}
+
 		curl_close($ch);
 		return $server_output;
 	}
@@ -54,6 +58,10 @@
 
 		$server_output = curl_exec($ch);
 
+		if($server_output == false) {
+			throwError(curl_error($ch));
+		}
+
 		curl_close($ch);
 		return $server_output;
 	}
@@ -66,36 +74,40 @@
 		$final = array();
 
 		if($content != null && $content != '') {
-			$regex = "/timeo_ligne_nom'>([a-zA-Z0-9- ']+).+timeo_titre_direction'>([a-zA-Z0-9- ']+).+timeo_titre_arret'>([a-zA-Z0-9&; '-]+).+\n.+\n.+\n.+\n((\s<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&; '-]+)<\/li>\n)*)/";
-			preg_match_all($regex, $content, $schedule, PREG_SET_ORDER);
+			try {
+				$regex = "/timeo_ligne_nom'>([a-zA-Z0-9- ']+).+timeo_titre_direction'>([a-zA-Z0-9- ']+).+timeo_titre_arret'>([a-zA-Z0-9&; '-]+).+\n.+\n.+\n.+\n((\s<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&; '-]+)<\/li>\n)*)/";
+				preg_match_all($regex, $content, $schedule, PREG_SET_ORDER);
 
-			if($schedule != null) {
-				for($i = 0; $i < count($schedule); $i++) {
-					for($j =  0; $j < count($schedule[$i]); $j++) {
-						switch ($j) {
-							case 1:
-								$final[$i]['line'] = $schedule[$i][$j];
-								break;
-							case 2:
-								$final[$i]['direction'] = $schedule[$i][$j];
-								break;
-							case 3:
-								$final[$i]['stop'] = $schedule[$i][$j];
-								break;
-							case 4:
-								preg_match_all("/<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&; -]+)<\/li>/", $schedule[$i][$j], $schedule[$i][$j]);
-								
-								if($schedule[$i][$j][1] != null) {
-									$final[$i]['next'] = $schedule[$i][$j][1];
-								}
+				if($schedule != null) {
+					for($i = 0; $i < count($schedule); $i++) {
+						for($j =  0; $j < count($schedule[$i]); $j++) {
+							switch ($j) {
+								case 1:
+									$final[$i]['line'] = $schedule[$i][$j];
+									break;
+								case 2:
+									$final[$i]['direction'] = $schedule[$i][$j];
+									break;
+								case 3:
+									$final[$i]['stop'] = $schedule[$i][$j];
+									break;
+								case 4:
+									preg_match_all("/<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&; -]+)<\/li>/", $schedule[$i][$j], $schedule[$i][$j]);
+									
+									if($schedule[$i][$j][1] != null) {
+										$final[$i]['next'] = $schedule[$i][$j][1];
+									}
 
-								break;
+									break;
+							}
 						}
 					}
-				}
 
-				echo html_entity_decode(json_encode($final));
-			}	
+					echo html_entity_decode(json_encode($final));
+				}
+			} catch(Exception $e) {
+				throwError($e->getMessage());
+			}
 		}
 	}
 
@@ -111,24 +123,28 @@
 		$lines;
 		$final = array();
 
-		//returns a piece of HTML: parse it to only get insteresting info
-		preg_match_all("/<option value='([a-zA-Z0-9]+)'>([a-zA-Z0-9 ]+)<\/option>/", $content, $lines, PREG_SET_ORDER);
+		try {
+			//returns a piece of HTML: parse it to only get insteresting info
+			preg_match_all("/<option value='([a-zA-Z0-9]+)'>([a-zA-Z0-9 ]+)<\/option>/", $content, $lines, PREG_SET_ORDER);
 
-		if($lines != null) {
-			for($i = 0; $i < count($lines); $i++) {
-				for($j =  0; $j < count($lines[$i]); $j++) {
-					switch ($j) {
-						case 1:
-							$final[$i]['id'] = $lines[$i][$j];
-							break;
-						case 2:
-							$final[$i]['name'] = $lines[$i][$j];
-							break;
+			if($lines != null) {
+				for($i = 0; $i < count($lines); $i++) {
+					for($j =  0; $j < count($lines[$i]); $j++) {
+						switch ($j) {
+							case 1:
+								$final[$i]['id'] = $lines[$i][$j];
+								break;
+							case 2:
+								$final[$i]['name'] = $lines[$i][$j];
+								break;
+						}
 					}
 				}
-			}
 
-			echo html_entity_decode(json_encode($final));
+				echo html_entity_decode(json_encode($final));
+			}
+		} catch(Exception $e) {
+			throwError($e->getMessage());
 		}
 	}
 
@@ -138,17 +154,21 @@
 		$directions;
 		$final = array();
 
-		//this returns a piece of JS code: we only want some of the info
-		preg_match_all("/Array\('[A|R]','([a-zA-Z0-9\\\\\-' ]+)'\);/", $content, $directions);
+		try {
+			//this returns a piece of JS code: we only want some of the info
+			preg_match_all("/Array\('[A|R]','([a-zA-Z0-9\\\\\-' ]+)'\);/", $content, $directions);
 
-		if($directions != null && $directions[0] != null) {
-			$final[0]['id'] = 'A';
-			$final[0]['name'] = str_replace("\\", '', $directions[1][0]);
+			if($directions != null && $directions[0] != null) {
+				$final[0]['id'] = 'A';
+				$final[0]['name'] = str_replace("\\", '', $directions[1][0]);
 
-			$final[1]['id'] = 'R';
-			$final[1]['name'] = str_replace("\\", '', $directions[1][1]);
+				$final[1]['id'] = 'R';
+				$final[1]['name'] = str_replace("\\", '', $directions[1][1]);
 
-			echo html_entity_decode(json_encode($final));
+				echo html_entity_decode(json_encode($final));
+			}
+		} catch(Exception $e) {
+			throwError($e->getMessage());
 		}
 	}
 
@@ -158,25 +178,33 @@
 		$stops;
 		$final = array();
 
-		preg_match_all("/Array\('([\-_0-9]+)','([a-zA-Z0-9\\\\\-' ]+)'\);/", $content, $stops, PREG_SET_ORDER);
+		try {
+			preg_match_all("/Array\('([\-_0-9]+)','([a-zA-Z0-9\\\\\-' ]+)'\);/", $content, $stops, PREG_SET_ORDER);
 
-		if($stops != null) {
-			for($i = 0; $i < count($stops); $i++) {
-				for($j =  0; $j < count($stops[$i]); $j++) {
-					switch ($j) {
-						case 1:
-							$expl = explode('_', $stops[$i][$j]);
-							$final[$i]['id'] = $expl[1];
-							break;
-						case 2:
-							$final[$i]['name'] = str_replace("\\", '', $stops[$i][$j]);
-							break;
+			if($stops != null) {
+				for($i = 0; $i < count($stops); $i++) {
+					for($j =  0; $j < count($stops[$i]); $j++) {
+						switch ($j) {
+							case 1:
+								$expl = explode('_', $stops[$i][$j]);
+								$final[$i]['id'] = $expl[1];
+								break;
+							case 2:
+								$final[$i]['name'] = str_replace("\\", '', $stops[$i][$j]);
+								break;
+						}
 					}
 				}
-			}
 
-			echo html_entity_decode(json_encode($final));
+				echo html_entity_decode(json_encode($final));
+			}
+		} catch(Exception $e) {
+			throwError($e->getMessage());
 		}
+	}
+
+	function throwError($reason) {
+		echo '{"error":"' . $reason . '"}';
 	}
 	
 	//check what we want to get
