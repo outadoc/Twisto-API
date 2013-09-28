@@ -204,7 +204,8 @@
 	}
 
 	function throwError($reason) {
-		echo '{"error":"' . $reason . '"}';
+		//exiting with an error displayed in a JSON object
+		exit('{"error":"' . $reason . '"}');
 	}
 	
 	//check what we want to get
