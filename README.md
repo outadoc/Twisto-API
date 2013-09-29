@@ -156,6 +156,8 @@ Le cookie est de la forme `ARRÊT|LIGNE|DIRECTION;ARRÊT|LIGNE|DIRECTION;...`, a
 ]
 ```
 
+----------------------------------------
+
 ### Gestion des erreurs
 
 Si une erreur survient durant l'exécution du script, un message d'erreur devrait être inclus dans le JSON retourné.
@@ -165,3 +167,5 @@ Si une erreur survient durant l'exécution du script, un message d'erreur devrai
 ```json
 {"error":"Could not resolve host: dev.actigraph.fr; nodename nor servname provided, or not known"}
 ```
+
+Le script retournera une erreur 400 si des paramètres sont manquants ou non reconnus.

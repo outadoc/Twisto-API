@@ -227,6 +227,9 @@
 	} else if($_GET['func'] == "getStops" && isset($_GET['line']) && isset($_GET['direction'])) {
 		//if we want to list the available bus stops
 		getStops($_GET['line'], $_GET['direction']);
+	} else {
+		header('HTTP/1.1 400 Bad Request', true, 400);
+		exit();
 	}
 
 ?>
