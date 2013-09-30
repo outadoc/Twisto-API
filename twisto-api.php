@@ -179,7 +179,7 @@
 		$final = array();
 
 		try {
-			preg_match_all("/Array\('([\-_0-9]+)','([a-zA-Z0-9\\\\\-'\. ]+)'\);/", $content, $stops, PREG_SET_ORDER);
+			preg_match_all("/Array\('([\-_\|0-9]+)','([a-zA-Z0-9\\\\\-'\. ]+)'\);/", $content, $stops, PREG_SET_ORDER);
 
 			if($stops != null) {
 				for($i = 0; $i < count($stops); $i++) {
