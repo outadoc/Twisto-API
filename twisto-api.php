@@ -125,7 +125,7 @@
 
 		try {
 			//returns a piece of HTML: parse it to only get insteresting info
-			preg_match_all("/<option value='([a-zA-Z0-9]+)'>([a-zA-Z0-9 ]+)<\/option>/", $content, $lines, PREG_SET_ORDER);
+			preg_match_all("/<option value='([a-zA-Z0-9]+)'>([a-zA-Z0-9\/ ]+)<\/option>/", $content, $lines, PREG_SET_ORDER);
 
 			if($lines != null) {
 				for($i = 0; $i < count($lines); $i++) {
