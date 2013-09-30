@@ -75,7 +75,7 @@
 
 		if($content != null && $content != '') {
 			try {
-				$regex = "/timeo_ligne_nom'>([a-zA-Z0-9- ']+).+timeo_titre_direction'>([a-zA-Z0-9- ']+).+timeo_titre_arret'>([a-zA-Z0-9&; '-]+).+\n.+\n.+\n.+\n((\s<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&; '-]+)<\/li>\n)*)/";
+				$regex = "/timeo_ligne_nom'>([a-zA-Z0-9- ']+).+timeo_titre_direction'>([a-zA-Z0-9-\. ']+).+timeo_titre_arret'>([a-zA-Z0-9&;\. '-]+).+\n.+\n.+\n.+\n((\s<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&;\. '-]+)<\/li>\n)*)/";
 				preg_match_all($regex, $content, $schedule, PREG_SET_ORDER);
 
 				if($schedule != null) {
@@ -92,7 +92,7 @@
 									$final[$i]['stop'] = $schedule[$i][$j];
 									break;
 								case 4:
-									preg_match_all("/<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&; -]+)<\/li>/", $schedule[$i][$j], $schedule[$i][$j]);
+									preg_match_all("/<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&;\. -]+)<\/li>/", $schedule[$i][$j], $schedule[$i][$j]);
 									
 									if($schedule[$i][$j][1] != null) {
 										$final[$i]['next'] = $schedule[$i][$j][1];
@@ -125,7 +125,7 @@
 
 		try {
 			//returns a piece of HTML: parse it to only get insteresting info
-			preg_match_all("/<option value='([a-zA-Z0-9]+)'>([a-zA-Z0-9\/ ]+)<\/option>/", $content, $lines, PREG_SET_ORDER);
+			preg_match_all("/<option value='([a-zA-Z0-9]+)'>([a-zA-Z0-9\/\.- ]+)<\/option>/", $content, $lines, PREG_SET_ORDER);
 
 			if($lines != null) {
 				for($i = 0; $i < count($lines); $i++) {
@@ -156,7 +156,7 @@
 
 		try {
 			//this returns a piece of JS code: we only want some of the info
-			preg_match_all("/Array\('[A|R]','([a-zA-Z0-9\\\\\-' ]+)'\);/", $content, $directions);
+			preg_match_all("/Array\('[A|R]','([a-zA-Z0-9\\\\\-'\. ]+)'\);/", $content, $directions);
 
 			if($directions != null && $directions[0] != null) {
 				$final[0]['id'] = 'A';
@@ -179,7 +179,7 @@
 		$final = array();
 
 		try {
-			preg_match_all("/Array\('([\-_0-9]+)','([a-zA-Z0-9\\\\\-' ]+)'\);/", $content, $stops, PREG_SET_ORDER);
+			preg_match_all("/Array\('([\-_0-9]+)','([a-zA-Z0-9\\\\\-'\. ]+)'\);/", $content, $stops, PREG_SET_ORDER);
 
 			if($stops != null) {
 				for($i = 0; $i < count($stops); $i++) {
