@@ -81,14 +81,14 @@
 
 				if($schedule != null) {
 					for($i = 0; $i < count($schedule); $i++) {
-						$final[$i]['line'] = $schedule[$i][1];
-						$final[$i]['direction'] = $schedule[$i][2];
-						$final[$i]['stop'] = $schedule[$i][3];
+						$final[$i]['line'] = ucwords($schedule[$i][1]);
+						$final[$i]['direction'] = ucwords($schedule[$i][2]);
+						$final[$i]['stop'] = ucwords($schedule[$i][3]);
 
 						preg_match_all("/<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&;\.\- ]+)<\/li>/", $schedule[$i][4], $schedule[$i][4]);
 									
 						if($schedule[$i][4][1] != null) {
-							$final[$i]['next'] = $schedule[$i][4][1];
+							$final[$i]['next'] = ucwords($schedule[$i][4][1]);
 						}
 					}
 
@@ -124,7 +124,7 @@
 				if($lines != null) {
 					for($i = 0; $i < count($lines); $i++) {
 						$final[$i]['id'] = $lines[$i][1];
-						$final[$i]['name'] = $lines[$i][2];
+						$final[$i]['name'] = ucwords($lines[$i][2]);
 					}
 
 					echo html_entity_decode(json_encode($final));
@@ -152,10 +152,10 @@
 
 				if($directions != null && $directions[0] != null) {
 					$final[0]['id'] = 'A';
-					$final[0]['name'] = str_replace("\\", '', $directions[1][0]);
+					$final[0]['name'] = ucwords(str_replace("\\", '', $directions[1][0]));
 
 					$final[1]['id'] = 'R';
-					$final[1]['name'] = str_replace("\\", '', $directions[1][1]);
+					$final[1]['name'] = ucwords(str_replace("\\", '', $directions[1][1]));
 
 					echo html_entity_decode(json_encode($final));
 				} else {
@@ -183,7 +183,7 @@
 					for($i = 0; $i < count($stops); $i++) {
 						$expl = explode('_', $stops[$i][1]);
 						$final[$i]['id'] = $expl[1];
-						$final[$i]['name'] = str_replace("\\", '', $stops[$i][2]);
+						$final[$i]['name'] = ucwords(str_replace("\\", '', $stops[$i][2]));
 					}
 
 					echo html_entity_decode(json_encode($final));
