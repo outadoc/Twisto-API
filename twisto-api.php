@@ -37,10 +37,11 @@
 
 		if($server_output == false) {
 			throwError(curl_error($ch));
+		} else {
+			return $server_output;
 		}
 
 		curl_close($ch);
-		return $server_output;
 	}
 
 	//this does the same, but for POST method and with no cookies :(
@@ -104,10 +105,14 @@
 					}
 
 					echo html_entity_decode(json_encode($final));
+				} else {
+					throwError("Parsing error");
 				}
 			} catch(Exception $e) {
 				throwError($e->getMessage());
 			}
+		} else {
+			throwError("No content");
 		}
 	}
 
@@ -123,28 +128,34 @@
 		$lines;
 		$final = array();
 
-		try {
-			//returns a piece of HTML: parse it to only get insteresting info
-			preg_match_all("/<option value='([a-zA-Z0-9]+)'>([a-zA-Z0-9\/\.\- ]+)<\/option>/", $content, $lines, PREG_SET_ORDER);
+		if($content != null && $content != '') {
+			try {
+				//returns a piece of HTML: parse it to only get insteresting info
+				preg_match_all("/<option value='([a-zA-Z0-9]+)'>([a-zA-Z0-9\/\.\- ]+)<\/option>/", $content, $lines, PREG_SET_ORDER);
 
-			if($lines != null) {
-				for($i = 0; $i < count($lines); $i++) {
-					for($j =  0; $j < count($lines[$i]); $j++) {
-						switch ($j) {
-							case 1:
-								$final[$i]['id'] = $lines[$i][$j];
-								break;
-							case 2:
-								$final[$i]['name'] = $lines[$i][$j];
-								break;
+				if($lines != null) {
+					for($i = 0; $i < count($lines); $i++) {
+						for($j =  0; $j < count($lines[$i]); $j++) {
+							switch ($j) {
+								case 1:
+									$final[$i]['id'] = $lines[$i][$j];
+									break;
+								case 2:
+									$final[$i]['name'] = $lines[$i][$j];
+									break;
+							}
 						}
 					}
-				}
 
-				echo html_entity_decode(json_encode($final));
+					echo html_entity_decode(json_encode($final));
+				} else {
+					throwError("Parsing error");
+				}
+			} catch(Exception $e) {
+				throwError($e->getMessage());
 			}
-		} catch(Exception $e) {
-			throwError($e->getMessage());
+		} else {
+			throwError("No content");
 		}
 	}
 
@@ -154,21 +165,27 @@
 		$directions;
 		$final = array();
 
-		try {
-			//this returns a piece of JS code: we only want some of the info
-			preg_match_all("/Array\('[A|R]','([a-zA-Z0-9\\\\\-'\. ]+)'\);/", $content, $directions);
+		if($content != null && $content != '') {
+			try {
+				//this returns a piece of JS code: we only want some of the info
+				preg_match_all("/Array\('[A|R]','([a-zA-Z0-9\\\\\-'\. ]+)'\);/", $content, $directions);
 
-			if($directions != null && $directions[0] != null) {
-				$final[0]['id'] = 'A';
-				$final[0]['name'] = str_replace("\\", '', $directions[1][0]);
+				if($directions != null && $directions[0] != null) {
+					$final[0]['id'] = 'A';
+					$final[0]['name'] = str_replace("\\", '', $directions[1][0]);
 
-				$final[1]['id'] = 'R';
-				$final[1]['name'] = str_replace("\\", '', $directions[1][1]);
+					$final[1]['id'] = 'R';
+					$final[1]['name'] = str_replace("\\", '', $directions[1][1]);
 
-				echo html_entity_decode(json_encode($final));
+					echo html_entity_decode(json_encode($final));
+				} else {
+					throwError("Parsing error");
+				}
+			} catch(Exception $e) {
+				throwError($e->getMessage());
 			}
-		} catch(Exception $e) {
-			throwError($e->getMessage());
+		} else {
+			throwError("No content");
 		}
 	}
 
@@ -178,28 +195,34 @@
 		$stops;
 		$final = array();
 
-		try {
-			preg_match_all("/Array\('([\-_\|0-9]+)','([a-zA-Z0-9\\\\\-'\. ]+)'\);/", $content, $stops, PREG_SET_ORDER);
+		if($content != null && $content != '') {
+			try {
+				preg_match_all("/Array\('([\-_\|0-9]+)','([a-zA-Z0-9\\\\\-'\. ]+)'\);/", $content, $stops, PREG_SET_ORDER);
 
-			if($stops != null) {
-				for($i = 0; $i < count($stops); $i++) {
-					for($j =  0; $j < count($stops[$i]); $j++) {
-						switch ($j) {
-							case 1:
-								$expl = explode('_', $stops[$i][$j]);
-								$final[$i]['id'] = $expl[1];
-								break;
-							case 2:
-								$final[$i]['name'] = str_replace("\\", '', $stops[$i][$j]);
-								break;
+				if($stops != null) {
+					for($i = 0; $i < count($stops); $i++) {
+						for($j =  0; $j < count($stops[$i]); $j++) {
+							switch ($j) {
+								case 1:
+									$expl = explode('_', $stops[$i][$j]);
+									$final[$i]['id'] = $expl[1];
+									break;
+								case 2:
+									$final[$i]['name'] = str_replace("\\", '', $stops[$i][$j]);
+									break;
+							}
 						}
 					}
-				}
 
-				echo html_entity_decode(json_encode($final));
+					echo html_entity_decode(json_encode($final));
+				} else {
+					throwError("Parsing error");
+				}
+			} catch(Exception $e) {
+				throwError($e->getMessage());
 			}
-		} catch(Exception $e) {
-			throwError($e->getMessage());
+		} else {
+			throwError("No content");
 		}
 	}
 
