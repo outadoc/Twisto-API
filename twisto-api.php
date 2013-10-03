@@ -81,26 +81,14 @@
 
 				if($schedule != null) {
 					for($i = 0; $i < count($schedule); $i++) {
-						for($j =  0; $j < count($schedule[$i]); $j++) {
-							switch ($j) {
-								case 1:
-									$final[$i]['line'] = $schedule[$i][$j];
-									break;
-								case 2:
-									$final[$i]['direction'] = $schedule[$i][$j];
-									break;
-								case 3:
-									$final[$i]['stop'] = $schedule[$i][$j];
-									break;
-								case 4:
-									preg_match_all("/<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&;\.\- ]+)<\/li>/", $schedule[$i][$j], $schedule[$i][$j]);
-									
-									if($schedule[$i][$j][1] != null) {
-										$final[$i]['next'] = $schedule[$i][$j][1];
-									}
+						$final[$i]['line'] = $schedule[$i][1];
+						$final[$i]['direction'] = $schedule[$i][2];
+						$final[$i]['stop'] = $schedule[$i][3];
 
-									break;
-							}
+						preg_match_all("/<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&;\.\- ]+)<\/li>/", $schedule[$i][4], $schedule[$i][4]);
+									
+						if($schedule[$i][4][1] != null) {
+							$final[$i]['next'] = $schedule[$i][4][1];
 						}
 					}
 
@@ -135,16 +123,8 @@
 
 				if($lines != null) {
 					for($i = 0; $i < count($lines); $i++) {
-						for($j =  0; $j < count($lines[$i]); $j++) {
-							switch ($j) {
-								case 1:
-									$final[$i]['id'] = $lines[$i][$j];
-									break;
-								case 2:
-									$final[$i]['name'] = $lines[$i][$j];
-									break;
-							}
-						}
+						$final[$i]['id'] = $lines[$i][1];
+						$final[$i]['name'] = $lines[$i][2];
 					}
 
 					echo html_entity_decode(json_encode($final));
@@ -201,17 +181,9 @@
 
 				if($stops != null) {
 					for($i = 0; $i < count($stops); $i++) {
-						for($j =  0; $j < count($stops[$i]); $j++) {
-							switch ($j) {
-								case 1:
-									$expl = explode('_', $stops[$i][$j]);
-									$final[$i]['id'] = $expl[1];
-									break;
-								case 2:
-									$final[$i]['name'] = str_replace("\\", '', $stops[$i][$j]);
-									break;
-							}
-						}
+						$expl = explode('_', $stops[$i][1]);
+						$final[$i]['id'] = $expl[1];
+						$final[$i]['name'] = str_replace("\\", '', $stops[$i][2]);
 					}
 
 					echo html_entity_decode(json_encode($final));
