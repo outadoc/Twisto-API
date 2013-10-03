@@ -88,7 +88,7 @@
 						preg_match_all("/<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&;\.\- ]+)<\/li>/", $schedule[$i][4], $schedule[$i][4]);
 									
 						if($schedule[$i][4][1] != null) {
-							$final[$i]['next'] = ucwords($schedule[$i][4][1]);
+							$final[$i]['next'] = $schedule[$i][4][1];
 						}
 					}
 
