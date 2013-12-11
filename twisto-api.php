@@ -3,7 +3,7 @@
 		Twisto real-time API
 		Copyright (C) outa[dev] 2013
 	
-		timeo.php
+		twisto-api.php
 		
 		
 		This program is free software: you can redistribute it and/or modify
