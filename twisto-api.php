@@ -76,6 +76,9 @@
 
 		if($content != null && $content != '') {
 			try {
+				//a custom style is used when buses are passing now: remove those 
+				preg_replace("/<blink style='color:red'>([a-zA-Z0-9]+)<\/blink>/", "$1", $content);
+
 				$regex = "/timeo_ligne_nom'>([a-zA-Z0-9- ']+).+timeo_titre_direction'>([a-zA-Z0-9-\.\- ']+).+timeo_titre_arret'>([a-zA-Z0-9&;\. '\-]+).+\n.+\n.+\n.+\n((\s<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&;\. '\-]+)<\/li>\n)*)/";
 				preg_match_all($regex, $content, $schedule, PREG_SET_ORDER);
 
@@ -85,8 +88,10 @@
 						$final[$i]['direction'] = ucwords($schedule[$i][2]);
 						$final[$i]['stop'] = ucwords($schedule[$i][3]);
 
+						//match the next buses schedules
 						preg_match_all("/<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&;\.\- ]+)<\/li>/", $schedule[$i][4], $schedule[$i][4]);
 						
+						//if there are any
 						if($schedule[$i][4][1] != null) {
 							$final[$i]['next'] = preg_replace("/([a-zA-Z0-9&;\. '\-]+) vers (A|B) [A-Z0-9&;\. '\-]+/", "Ligne $2 : $1", $schedule[$i][4][1]);
 						} else {
