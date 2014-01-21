@@ -106,6 +106,10 @@ L'identifiant est A pour "aller", ou R pour "retour".
 
 ...où XX est l'identifiant de la ligne, la direction est A ou R et XXXX est l'identifiant de l'arrêt.
 
+*Exemple de requête* :
+
+	twisto-api.php?func=getSchedule&line=11&direction=A&stop=5421
+
 *Exemple de résultat* :
 
 ```json
