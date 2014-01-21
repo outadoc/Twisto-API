@@ -123,11 +123,11 @@ Le cookie est de la forme `ARRÊT|LIGNE|DIRECTION;ARRÊT|LIGNE|DIRECTION;...`.
 
 *Exemple de requête (non-URLencoded)* :
 
-	twisto-api.php?func=getSchedule&data=5421%7C11%7CA%3B12%7C11%7CR%3B251%7C3%7CA
+	twisto-api.php?func=getSchedule&data=5421|11|A;12|11|R;251|3|A
 
 *Exemple de requête (URLencoded)* :
 
-	twisto-api.php?func=getSchedule&data=5421|11|A;12|11|R;251|3|A
+	twisto-api.php?func=getSchedule&data=5421%7C11%7CA%3B12%7C11%7CR%3B251%7C3%7CA
 
 *Exemple de résultat* :
 
