@@ -94,8 +94,6 @@
 					$cookiesList[$i] .= ';' . $tmpCookies[$j+$k];
 				}
 			}
-
-			echo $cookiesList[$i];
 		}
 
 		//we then iterate through the list of cookies to send, and request four bus schedules at a time, max.
