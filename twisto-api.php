@@ -21,6 +21,7 @@
 	*/
 
 	define('API_BASE_URL', 'http://dev.actigraph.fr/actipages/twisto/module/mobile/pivk/relais.html.php');
+	define('MAX_COOKIE_COUNT', 4);
 	
 	//this gets a distant page with curl, via GET and with a cookie (it's always better with cookies)
 	function getDistantPage($fields, $cookie) {
@@ -79,9 +80,10 @@
 
 		//twisto's website will only allow us to request for four bus stops at a time, max.
 		//what we're doing here to get around that, is we're splitting our eventually massive request into smaller requests
-		for($i = 0; $i < count($tmpCookies) / 4; $i++) {
+		for($i = 0; $i < count($tmpCookies) / MAX_COOKIE_COUNT; $i++) {
 			//append the next four stops to the cookie
-			$cookiesList[$i] = $tmpCookies[$i*4] . ';' . $tmpCookies[$i*4+1] . ';' . $tmpCookies[$i*4+2] . ';' . $tmpCookies[$i*4+3];
+			$j = $i * MAX_COOKIE_COUNT;
+			$cookiesList[$i] = $tmpCookies[$j] . ';' . $tmpCookies[$j+1] . ';' . $tmpCookies[$j+2] . ';' . $tmpCookies[$j+3];
 		}
 
 		//we then iterate through the list of cookies to send, and request four bus schedules at a time, max.
