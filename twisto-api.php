@@ -83,7 +83,19 @@
 		for($i = 0; $i < count($tmpCookies) / MAX_COOKIE_COUNT; $i++) {
 			//append the next four stops to the cookie
 			$j = $i * MAX_COOKIE_COUNT;
-			$cookiesList[$i] = $tmpCookies[$j] . ';' . $tmpCookies[$j+1] . ';' . $tmpCookies[$j+2] . ';' . $tmpCookies[$j+3];
+
+			//set it to a first cookie
+			$cookiesList[$i] = $tmpCookies[$j];
+
+			//append up to three cookies to this first one
+			for($k = 1; $k < MAX_COOKIE_COUNT; $k++) {
+				//only append them if they exist, obviously
+				if($tmpCookies[$j+$k] != null) {
+					$cookiesList[$i] .= ';' . $tmpCookies[$j+$k];
+				}
+			}
+
+			echo $cookiesList[$i];
 		}
 
 		//we then iterate through the list of cookies to send, and request four bus schedules at a time, max.
