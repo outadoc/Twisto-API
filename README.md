@@ -50,6 +50,10 @@ L'identifiant obtenu pour chaque ligne pourra servir pour les autres fonctions d
 
 ...où XX est l'identifiant de la ligne.
 
+*Exemple de requête* :
+
+	twisto-api.php?func=getDirections&line=11
+
 *Exemple de résultat* :
 
 ```json
@@ -69,24 +73,28 @@ L'identifiant est A pour "aller", ou R pour "retour".
 
 ...où XX est l'identifiant de la ligne, et la direction est A ou R.
 
+*Exemple de requête* :
+
+	twisto-api.php?func=getStops&line=11&direction=A
+
 *Exemple de résultat* :
 
 ```json
 [
-	{"id": "5421", "name": "50 acres"},
-	{"id": "11", "name": "Bibliotheque"},
-	{"id": "4072", "name": "Bois claquet"},
-	{"id": "4082", "name": "Briere"},
-	{"id": "3532", "name": "Carrefour de la liberte"},
-	{"id": "4112", "name": "Charmettes"},
-	{"id": "4122", "name": "Clair soleil"},
-	{"id": "511", "name": "Creux au renard"},
-	{"id": "1892", "name": "Demi-lune"},
-	{"id": "121", "name": "Demoge"},
-	{"id": "2052", "name": "Edmond rostand"},
-	{"id": "5461", "name": "Eglise de bretteville"},
+	{"id": "5421", 	"name": "50 acres"},
+	{"id": "11", 	"name": "Bibliotheque"},
+	{"id": "4072", 	"name": "Bois claquet"},
+	{"id": "4082", 	"name": "Briere"},
+	{"id": "3532", 	"name": "Carrefour de la liberte"},
+	{"id": "4112",	"name": "Charmettes"},
+	{"id": "4122", 	"name": "Clair soleil"},
+	{"id": "511", 	"name": "Creux au renard"},
+	{"id": "1892", 	"name": "Demi-lune"},
+	{"id": "121", 	"name": "Demoge"},
+	{"id": "2052", 	"name": "Edmond rostand"},
+	{"id": "5461", 	"name": "Eglise de bretteville"},
 	...
-	{"id": "4392", "name": "Vallee barrey"}
+	{"id": "4392", 	"name": "Vallee barrey"}
 ]
 ```
 
