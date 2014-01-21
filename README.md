@@ -119,11 +119,15 @@ L'identifiant est A pour "aller", ou R pour "retour".
 ### Lister les prochains bus pour plusieurs lignes/directions/arrêts à la fois
 
 Pour cela, on envoie directement un cookie (le même que celui utilisé par le système officiel).  
-Le cookie est de la forme `ARRÊT|LIGNE|DIRECTION;ARRÊT|LIGNE|DIRECTION;...`, avec les pipes et points-virgules bien évidemment URLencoded.
+Le cookie est de la forme `ARRÊT|LIGNE|DIRECTION;ARRÊT|LIGNE|DIRECTION;...`.
 
-*Exemple de requête* :
+*Exemple de requête (non-URLencoded)* :
 
 	twisto-api.php?func=getSchedule&data=5421%7C11%7CA%3B12%7C11%7CR%3B251%7C3%7CA
+
+*Exemple de requête (URLencoded)* :
+
+	twisto-api.php?func=getSchedule&data=5421|11|A;12|11|R;251|3|A
 
 *Exemple de résultat* :
 
