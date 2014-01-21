@@ -70,45 +70,71 @@
 	//we already have a cookie containing a list of the lines we want to get schedules for; send it, parse it, return a JSON object with the full schedule.
 	//the cookie is of the form STOP|LINE|DIRECTION;STOP|LINE|DIRECTION;...
 	function getScheduleFromCookie($cookie) {
-		$content = getDistantPage("a=refresh&borne=affiche_borne&ran=1", $cookie);
-		$schedule;
-		$final = array();
+		$tmpCookies = array();
+		$cookiesList = array();
+		$finalSchedules = array();
 
-		if($content != null && $content != '') {
-			try {
-				//a custom style is used when buses are passing now: remove those 
-				$content = preg_replace("/<blink style='color:red'>([a-zA-Z0-9]+)<\/blink>/", "$1", $content);
+		preg_match_all("/(([0-9]+)\|([0-9a-zA-Z]+)\|(A|R))/", $cookie, $tmpCookies);
+		$tmpCookies = $tmpCookies[0];
 
-				$regex = "/timeo_ligne_nom'>([a-zA-Z0-9- ']+).+timeo_titre_direction'>([a-zA-Z0-9-\.\- ']+).+timeo_titre_arret'>([a-zA-Z0-9&;\. '\-]+).+\n.+\n.+\n.+\n((\s<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&;\. '\-]+)<\/li>\n)*)/";
-				preg_match_all($regex, $content, $schedule, PREG_SET_ORDER);
-
-				if($schedule != null) {
-					for($i = 0; $i < count($schedule); $i++) {
-						$final[$i]['line'] = ucwords($schedule[$i][1]);
-						$final[$i]['direction'] = ucwords($schedule[$i][2]);
-						$final[$i]['stop'] = ucwords($schedule[$i][3]);
-
-						//match the next buses schedules
-						preg_match_all("/<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&;\.\- ]+)<\/li>/", $schedule[$i][4], $schedule[$i][4]);
-						
-						//if there are any
-						if($schedule[$i][4][1] != null) {
-							$final[$i]['next'] = preg_replace("/([a-zA-Z0-9&;\. '\-]+) vers (A|B) [A-Z0-9&;\. '\-]+/", "Ligne $2 : $1", $schedule[$i][4][1]);
-						} else {
-							$final[$i]['next'] = array("Pas de passage prévu");
-						}
-					}
-
-					echo html_entity_decode(json_encode($final));
-				} else {
-					throwError("Parsing error");
-				}
-			} catch(Exception $e) {
-				throwError($e->getMessage());
-			}
-		} else {
-			throwError("No content");
+		//twisto's website will only allow us to request for four bus stops at a time, max.
+		//what we're doing here to get around that, is we're splitting our eventually massive request into smaller requests
+		for($i = 0; $i < count($tmpCookies) / 4; $i++) {
+			//append the next four stops to the cookie
+			$cookiesList[$i] = $tmpCookies[$i*4] . ';' . $tmpCookies[$i*4+1] . ';' . $tmpCookies[$i*4+2] . ';' . $tmpCookies[$i*4+3];
 		}
+
+		//we then iterate through the list of cookies to send, and request four bus schedules at a time, max.
+		for($i = 0; $i < count($cookiesList); $i++) {
+			//get page using our current cookie
+			$content = getDistantPage("a=refresh&borne=affiche_borne&ran=1", $cookiesList[$i]);
+			
+			$scheduleStr = null;
+			$scheduleArray = array();
+
+			//if we got something
+			if($content != null && $content != '') {
+				try {
+					//a custom style is used when buses are passing now: remove those 
+					$content = preg_replace("/<blink style='color:red'>([a-zA-Z0-9]+)<\/blink>/", "$1", $content);
+
+					$regex = "/timeo_ligne_nom'>([a-zA-Z0-9- ']+).+timeo_titre_direction'>([a-zA-Z0-9-\.\- ']+).+timeo_titre_arret'>([a-zA-Z0-9&;\. '\-]+).+\n.+\n.+\n.+\n((\s<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&;\. '\-]+)<\/li>\n)*)/";
+					preg_match_all($regex, $content, $scheduleStr, PREG_SET_ORDER);
+					
+					//if we could parse the page
+					if($scheduleStr != null) {
+						for($j = 0; $j < count($scheduleStr); $j++) {
+							//for each bus stop, get and save its information
+							$scheduleArray[$j]['line'] = ucwords($scheduleStr[$j][1]);
+							$scheduleArray[$j]['direction'] = ucwords($scheduleStr[$j][2]);
+							$scheduleArray[$j]['stop'] = ucwords($scheduleStr[$j][3]);
+
+							//match the next buses schedules
+							preg_match_all("/<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&;\.\- ]+)<\/li>/", $scheduleStr[$j][4], $scheduleStr[$j][4]);
+							
+							//if there are any schedules, save them
+							if($scheduleStr[$j][4][1] != null) {
+								$scheduleArray[$j]['next'] = preg_replace("/([a-zA-Z0-9&;\. '\-]+) vers (A|B) [A-Z0-9&;\. '\-]+/", "Ligne $2 : $1", $scheduleStr[$j][4][1]);
+							} else {
+								$scheduleArray[$j]['next'] = array("Pas de passage prévu");
+							}
+						}
+
+						//merge the current cookie's results with the global results
+						$finalSchedules = array_merge($finalSchedules, $scheduleArray);
+					} else {
+						throwError("Parsing error");
+					}
+				} catch(Exception $e) {
+					throwError($e->getMessage());
+				}
+			} else {
+				throwError("No content");
+			}
+		}
+
+		//display the json results
+		echo html_entity_decode(json_encode($finalSchedules));
 	}
 
 	//this basically is an alias to getScheduleFromCookie that allows us to search for the next buses for a line, direction, stop instead of a raw cookie.
