@@ -135,7 +135,7 @@
 						//merge the current cookie's results with the global results
 						$finalSchedules = array_merge($finalSchedules, $scheduleArray);
 					} else {
-						throwError("Parsing error");
+						throwError("Parsing error (bad request)");
 					}
 				} catch(Exception $e) {
 					throwError($e->getMessage());
@@ -174,7 +174,7 @@
 
 					echo html_entity_decode(json_encode($final));
 				} else {
-					throwError("Parsing error");
+					throwError("Parsing error (bad request)");
 				}
 			} catch(Exception $e) {
 				throwError($e->getMessage());
@@ -204,7 +204,7 @@
 
 					echo html_entity_decode(json_encode($final));
 				} else {
-					throwError("Parsing error");
+					throwError("Parsing error (bad request)");
 				}
 			} catch(Exception $e) {
 				throwError($e->getMessage());
@@ -233,7 +233,7 @@
 
 					echo html_entity_decode(json_encode($final));
 				} else {
-					throwError("Parsing error");
+					throwError("Parsing error (bad request)");
 				}
 			} catch(Exception $e) {
 				throwError($e->getMessage());
@@ -244,10 +244,16 @@
 	}
 
 	function throwError($reason) {
-		//exiting with an error displayed in a JSON object
+		//empty output buffer
+		ob_end_clean();
 		header('HTTP/1.1 500 Internal Server Error', true, 500);
+
+		//exiting with an error displayed in a JSON object
 		exit('{"error":"' . $reason . '"}');
 	}
+
+	//start output buffer
+	ob_start();
 	
 	//check what we want to get
 	//if we want the full schedule
@@ -269,8 +275,12 @@
 		//if we want to list the available bus stops
 		getStops($_GET['line'], $_GET['direction']);
 	} else {
+		ob_end_clean();
 		header('HTTP/1.1 400 Bad Request', true, 400);
+		
 		exit('{"error":"Not enough arguments"}');
 	}
+
+	ob_end_flush();
 
 ?>
