@@ -245,6 +245,7 @@
 
 	function throwError($reason) {
 		//exiting with an error displayed in a JSON object
+		header('HTTP/1.1 500 Internal Server Error', true, 500);
 		exit('{"error":"' . $reason . '"}');
 	}
 	
@@ -269,7 +270,7 @@
 		getStops($_GET['line'], $_GET['direction']);
 	} else {
 		header('HTTP/1.1 400 Bad Request', true, 400);
-		exit();
+		exit('{"error":"Not enough arguments"}');
 	}
 
 ?>
