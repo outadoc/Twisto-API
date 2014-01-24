@@ -195,13 +195,17 @@
 				//this returns a piece of JS code: we only want some of the info
 				preg_match_all("/Array\('[A|R]','([a-zA-Z0-9\\\\\-'\. ]+)'\);/", $content, $directions);
 
-				if($directions != null && $directions[0] != null) {
-					$final[0]['id'] = 'A';
-					$final[0]['name'] = ucwords(str_replace("\\", '', $directions[1][0]));
+				if($directions != null && $directions[1] != null) {
+					if($directions[1][0] != null) {
+						$final[0]['id'] = 'A';
+						$final[0]['name'] = ucwords(str_replace("\\", '', $directions[1][0]));
+					}
 
-					$final[1]['id'] = 'R';
-					$final[1]['name'] = ucwords(str_replace("\\", '', $directions[1][1]));
-
+					if($directions[1][1] != null) {
+						$final[1]['id'] = 'R';
+						$final[1]['name'] = ucwords(str_replace("\\", '', $directions[1][1]));
+					}
+					
 					echo html_entity_decode(json_encode($final));
 				} else {
 					throwError("Parsing error (bad request)");
