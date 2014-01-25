@@ -37,6 +37,7 @@
 		$server_output = curl_exec($ch);
 
 		if($server_output == false) {
+			curl_close($ch);
 			throwError(curl_error($ch));
 		}
 
@@ -60,6 +61,7 @@
 		$server_output = curl_exec($ch);
 
 		if($server_output == false) {
+			curl_close($ch);
 			throwError(curl_error($ch));
 		}
 
