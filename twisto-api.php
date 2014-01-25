@@ -38,11 +38,10 @@
 
 		if($server_output == false) {
 			throwError(curl_error($ch));
-		} else {
-			return $server_output;
 		}
 
 		curl_close($ch);
+		return $server_output;
 	}
 
 	//this does the same, but for POST method and with no cookies :(
