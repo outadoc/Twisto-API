@@ -135,7 +135,7 @@
 						//merge the current cookie's results with the global results
 						$finalSchedules = array_merge($finalSchedules, $scheduleArray);
 					} else {
-						throwError("Parsing error (bad request)");
+						throwError("Parsing error. Bad request, or website is down.");
 					}
 				} catch(Exception $e) {
 					throwError($e->getMessage());
@@ -174,7 +174,7 @@
 
 					echo html_entity_decode(json_encode($final));
 				} else {
-					throwError("Parsing error (bad request)");
+					throwError("Parsing error. Bad request, or website is down.");
 				}
 			} catch(Exception $e) {
 				throwError($e->getMessage());
@@ -208,7 +208,7 @@
 					
 					echo html_entity_decode(json_encode($final));
 				} else {
-					throwError("Parsing error (bad request)");
+					throwError("Parsing error. Bad request, or website is down.");
 				}
 			} catch(Exception $e) {
 				throwError($e->getMessage());
@@ -237,7 +237,7 @@
 
 					echo html_entity_decode(json_encode($final));
 				} else {
-					throwError("Parsing error (bad request)");
+					throwError("Parsing error. Bad request, or website is down.");
 				}
 			} catch(Exception $e) {
 				throwError($e->getMessage());
