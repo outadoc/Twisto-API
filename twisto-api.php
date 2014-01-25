@@ -117,9 +117,9 @@
 					if($scheduleStr != null) {
 						for($j = 0; $j < count($scheduleStr); $j++) {
 							//for each bus stop, get and save its information
-							$scheduleArray[$j]['line'] = ucwords($scheduleStr[$j][1]);
-							$scheduleArray[$j]['direction'] = ucwords($scheduleStr[$j][2]);
-							$scheduleArray[$j]['stop'] = ucwords($scheduleStr[$j][3]);
+							$scheduleArray[$j]['line'] = ucsmart($scheduleStr[$j][1]);
+							$scheduleArray[$j]['direction'] = ucsmart($scheduleStr[$j][2]);
+							$scheduleArray[$j]['stop'] = ucsmart($scheduleStr[$j][3]);
 
 							//match the next buses schedules
 							preg_match_all("/<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&;\.\- ]+)<\/li>/", $scheduleStr[$j][4], $scheduleStr[$j][4]);
@@ -169,7 +169,7 @@
 				if($lines != null) {
 					for($i = 0; $i < count($lines); $i++) {
 						$final[$i]['id'] = $lines[$i][1];
-						$final[$i]['name'] = ucwords($lines[$i][2]);
+						$final[$i]['name'] = ucsmart($lines[$i][2]);
 					}
 
 					echo html_entity_decode(json_encode($final));
@@ -198,12 +198,12 @@
 				if($directions != null && $directions[1] != null) {
 					if($directions[1][0] != null) {
 						$final[0]['id'] = 'A';
-						$final[0]['name'] = ucwords(str_replace("\\", '', $directions[1][0]));
+						$final[0]['name'] = ucsmart(str_replace("\\", '', $directions[1][0]));
 					}
 
 					if($directions[1][1] != null) {
 						$final[1]['id'] = 'R';
-						$final[1]['name'] = ucwords(str_replace("\\", '', $directions[1][1]));
+						$final[1]['name'] = ucsmart(str_replace("\\", '', $directions[1][1]));
 					}
 					
 					echo html_entity_decode(json_encode($final));
@@ -232,7 +232,7 @@
 					for($i = 0; $i < count($stops); $i++) {
 						$expl = explode('_', $stops[$i][1]);
 						$final[$i]['id'] = $expl[1];
-						$final[$i]['name'] = ucwords(str_replace("\\", '', $stops[$i][2]));
+						$final[$i]['name'] = ucsmart(str_replace("\\", '', $stops[$i][2]));
 					}
 
 					echo html_entity_decode(json_encode($final));
@@ -245,6 +245,22 @@
 		} else {
 			throwError("No content");
 		}
+	}
+
+	function ucsmart($text) {
+		//this function capitalizes the first letter of every word, like ucwords; except it does it WELL.
+		return preg_replace_callback('/([^a-z0-9]|^)([a-z0-9]*)/', function($matches) {
+			if(in_array($matches[2], Array('de', 'du', 'des', 'au', 'aux', 'à', 'la', 'le', 'les', 'd'))) {
+				//if the word is a determinant, don't capitalize it
+				return $matches[1] . $matches[2];
+			} else if(in_array($matches[2], Array('sncf', 'chu', 'chr'))) {
+				//if the word is an acronym, fully capitalize it
+				return $matches[1] . strtoupper($matches[2]);
+			} else {
+				//else, only capitalize the first letter of the word
+				return $matches[1] . ucfirst($matches[2]);
+			}
+		}, strtolower($text));
 	}
 
 	function throwError($reason) {
