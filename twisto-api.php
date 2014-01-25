@@ -250,8 +250,8 @@
 	function ucsmart($text) {
 		//this function capitalizes the first letter of every word, like ucwords; except it does it WELL.
 		return preg_replace_callback('/([^a-z0-9]|^)([a-z0-9]*)/', function($matches) {
-			if(in_array($matches[2], Array('de', 'du', 'des', 'au', 'aux', 'à', 'la', 'le', 'les', 'd'))) {
-				//if the word is a determinant, don't capitalize it
+			if($matches[1] != '' && in_array($matches[2], Array('de', 'du', 'des', 'au', 'aux', 'à', 'la', 'le', 'les', 'd'))) {
+				//if the word is a determinant and is not in the first word of the string, don't capitalize it
 				return $matches[1] . $matches[2];
 			} else if(in_array($matches[2], Array('sncf', 'chu', 'chr'))) {
 				//if the word is an acronym, fully capitalize it
