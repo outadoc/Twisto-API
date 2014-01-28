@@ -39,6 +39,9 @@
 		if($server_output == false) {
 			curl_close($ch);
 			throwError(curl_error($ch));
+		} else if (empty($server_output)) {
+			curl_close($ch);
+			throwError("Service indisponible");
 		}
 
 		curl_close($ch);
@@ -63,6 +66,9 @@
 		if($server_output == false) {
 			curl_close($ch);
 			throwError(curl_error($ch));
+		} else if (empty($server_output)) {
+			curl_close($ch);
+			throwError("Service indisponible");
 		}
 
 		curl_close($ch);
@@ -105,44 +111,39 @@
 			$scheduleStr = null;
 			$scheduleArray = array();
 
-			//if we got something
-			if($content != null && $content != '') {
-				try {
-					//a custom style is used when buses are passing now: remove those 
-					$content = preg_replace("/<blink style='color:red'>([a-zA-Z0-9]+)<\/blink>/", "$1", $content);
-					
-					$regex = "/timeo_ligne_nom'>([a-zA-Z0-9- ']+).+timeo_titre_direction'>([a-zA-Z0-9-\.\- ']+).+timeo_titre_arret'>Arr&ecirc;t&nbsp;([a-zA-Z0-9&;\. '\-]+).+\n.+\n.+\n.+\n((\s<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&;\. '\-]+)<\/li>\n)*)/";
-					preg_match_all($regex, $content, $scheduleStr, PREG_SET_ORDER);
-					
-					//if we could parse the page
-					if($scheduleStr != null) {
-						for($j = 0; $j < count($scheduleStr); $j++) {
-							//for each bus stop, get and save its information
-							$scheduleArray[$j]['line'] = ucsmart($scheduleStr[$j][1]);
-							$scheduleArray[$j]['direction'] = ucsmart($scheduleStr[$j][2]);
-							$scheduleArray[$j]['stop'] = ucsmart($scheduleStr[$j][3]);
+			try {
+				//a custom style is used when buses are passing now: remove those 
+				$content = preg_replace("/<blink style='color:red'>([a-zA-Z0-9]+)<\/blink>/", "$1", $content);
+				
+				$regex = "/timeo_ligne_nom'>([a-zA-Z0-9- ']+).+timeo_titre_direction'>([a-zA-Z0-9-\.\- ']+).+timeo_titre_arret'>Arr&ecirc;t&nbsp;([a-zA-Z0-9&;\. '\-]+).+\n.+\n.+\n.+\n((\s<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&;\. '\-]+)<\/li>\n)*)/";
+				preg_match_all($regex, $content, $scheduleStr, PREG_SET_ORDER);
+				
+				//if we could parse the page
+				if($scheduleStr != null) {
+					for($j = 0; $j < count($scheduleStr); $j++) {
+						//for each bus stop, get and save its information
+						$scheduleArray[$j]['line'] = ucsmart($scheduleStr[$j][1]);
+						$scheduleArray[$j]['direction'] = ucsmart($scheduleStr[$j][2]);
+						$scheduleArray[$j]['stop'] = ucsmart($scheduleStr[$j][3]);
 
-							//match the next buses schedules
-							preg_match_all("/<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&;\.\- ]+)<\/li>/", $scheduleStr[$j][4], $scheduleStr[$j][4]);
-							
-							//if there are any schedules, save them
-							if($scheduleStr[$j][4][1] != null) {
-								$scheduleArray[$j]['next'] = preg_replace("/([a-zA-Z0-9&;\. '\-]+) vers (A|B) [A-Z0-9&;\. '\-]+/", "Ligne $2 : $1", $scheduleStr[$j][4][1]);
-							} else {
-								$scheduleArray[$j]['next'] = array("Pas de passage prévu");
-							}
+						//match the next buses schedules
+						preg_match_all("/<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&;\.\- ]+)<\/li>/", $scheduleStr[$j][4], $scheduleStr[$j][4]);
+						
+						//if there are any schedules, save them
+						if($scheduleStr[$j][4][1] != null) {
+							$scheduleArray[$j]['next'] = preg_replace("/([a-zA-Z0-9&;\. '\-]+) vers (A|B) [A-Z0-9&;\. '\-]+/", "Ligne $2 : $1", $scheduleStr[$j][4][1]);
+						} else {
+							$scheduleArray[$j]['next'] = array("Pas de passage prévu");
 						}
-
-						//merge the current cookie's results with the global results
-						$finalSchedules = array_merge($finalSchedules, $scheduleArray);
-					} else {
-						throwError("Parsing error. Bad request, or website is down.");
 					}
-				} catch(Exception $e) {
-					throwError($e->getMessage());
+
+					//merge the current cookie's results with the global results
+					$finalSchedules = array_merge($finalSchedules, $scheduleArray);
+				} else {
+					throwError("Erreur de parsing (horaires non trouvée)");
 				}
-			} else {
-				throwError("No content");
+			} catch(Exception $e) {
+				throwError($e->getMessage());
 			}
 		}
 
@@ -162,26 +163,22 @@
 		$lines;
 		$final = array();
 
-		if($content != null && $content != '') {
-			try {
-				//returns a piece of HTML: parse it to only get insteresting info
-				preg_match_all("/<option value='([a-zA-Z0-9]+)'>([a-zA-Z0-9\/\.\- ]+)<\/option>/", $content, $lines, PREG_SET_ORDER);
+		try {
+			//returns a piece of HTML: parse it to only get insteresting info
+			preg_match_all("/<option value='([a-zA-Z0-9]+)'>([a-zA-Z0-9\/\.\- ]+)<\/option>/", $content, $lines, PREG_SET_ORDER);
 
-				if($lines != null) {
-					for($i = 0; $i < count($lines); $i++) {
-						$final[$i]['id'] = $lines[$i][1];
-						$final[$i]['name'] = ucsmart($lines[$i][2]);
-					}
-
-					echo html_entity_decode(json_encode($final));
-				} else {
-					throwError("Parsing error. Bad request, or website is down.");
+			if($lines != null) {
+				for($i = 0; $i < count($lines); $i++) {
+					$final[$i]['id'] = $lines[$i][1];
+					$final[$i]['name'] = ucsmart($lines[$i][2]);
 				}
-			} catch(Exception $e) {
-				throwError($e->getMessage());
+
+				echo html_entity_decode(json_encode($final));
+			} else {
+				throwError("Erreur de parsing (horaires non trouvée)");
 			}
-		} else {
-			throwError("No content");
+		} catch(Exception $e) {
+			throwError($e->getMessage());
 		}
 	}
 
@@ -191,31 +188,27 @@
 		$directions;
 		$final = array();
 
-		if($content != null && $content != '') {
-			try {
-				//this returns a piece of JS code: we only want some of the info
-				preg_match_all("/Array\('[A|R]','([a-zA-Z0-9\\\\\-'\. ]+)'\);/", $content, $directions);
+		try {
+			//this returns a piece of JS code: we only want some of the info
+			preg_match_all("/Array\('[A|R]','([a-zA-Z0-9\\\\\-'\. ]+)'\);/", $content, $directions);
 
-				if($directions != null && $directions[1] != null) {
-					if($directions[1][0] != null) {
-						$final[0]['id'] = 'A';
-						$final[0]['name'] = ucsmart(str_replace("\\", '', $directions[1][0]));
-					}
-
-					if($directions[1][1] != null) {
-						$final[1]['id'] = 'R';
-						$final[1]['name'] = ucsmart(str_replace("\\", '', $directions[1][1]));
-					}
-					
-					echo html_entity_decode(json_encode($final));
-				} else {
-					throwError("Parsing error. Bad request, or website is down.");
+			if($directions != null && $directions[1] != null) {
+				if($directions[1][0] != null) {
+					$final[0]['id'] = 'A';
+					$final[0]['name'] = ucsmart(str_replace("\\", '', $directions[1][0]));
 				}
-			} catch(Exception $e) {
-				throwError($e->getMessage());
+
+				if($directions[1][1] != null) {
+					$final[1]['id'] = 'R';
+					$final[1]['name'] = ucsmart(str_replace("\\", '', $directions[1][1]));
+				}
+				
+				echo html_entity_decode(json_encode($final));
+			} else {
+				throwError("Erreur de parsing (horaires non trouvée)");
 			}
-		} else {
-			throwError("No content");
+		} catch(Exception $e) {
+			throwError($e->getMessage());
 		}
 	}
 
@@ -225,26 +218,22 @@
 		$stops;
 		$final = array();
 
-		if($content != null && $content != '') {
-			try {
-				preg_match_all("/Array\('([\-_\|0-9]+)','([a-zA-Z0-9\\\\\-'\. ]+)'\);/", $content, $stops, PREG_SET_ORDER);
+		try {
+			preg_match_all("/Array\('([\-_\|0-9]+)','([a-zA-Z0-9\\\\\-'\. ]+)'\);/", $content, $stops, PREG_SET_ORDER);
 
-				if($stops != null) {
-					for($i = 0; $i < count($stops); $i++) {
-						$expl = explode('_', $stops[$i][1]);
-						$final[$i]['id'] = $expl[1];
-						$final[$i]['name'] = ucsmart(str_replace("\\", '', $stops[$i][2]));
-					}
-
-					echo html_entity_decode(json_encode($final));
-				} else {
-					throwError("Parsing error. Bad request, or website is down.");
+			if($stops != null) {
+				for($i = 0; $i < count($stops); $i++) {
+					$expl = explode('_', $stops[$i][1]);
+					$final[$i]['id'] = $expl[1];
+					$final[$i]['name'] = ucsmart(str_replace("\\", '', $stops[$i][2]));
 				}
-			} catch(Exception $e) {
-				throwError($e->getMessage());
+
+				echo html_entity_decode(json_encode($final));
+			} else {
+				throwError("Erreur de parsing (horaires non trouvée)");
 			}
-		} else {
-			throwError("No content");
+		} catch(Exception $e) {
+			throwError($e->getMessage());
 		}
 	}
 
