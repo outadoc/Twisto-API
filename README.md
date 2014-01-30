@@ -177,12 +177,19 @@ Le cookie est de la forme `ARRÊT|LIGNE|DIRECTION;ARRÊT|LIGNE|DIRECTION;...`.
 
 ### Gestion des erreurs
 
-Si une erreur survient durant l'exécution du script, un message d'erreur devrait être inclus dans le JSON retourné.
+Si une erreur survient durant l'exécution du script, un message d'erreur devrait être inclus dans le JSON retourné, ainsi qu'une code de statut HTTP 500 (ou 400 en cas de paramètres manquants).
 
-*Exemple* :
+*Exemples* :
 
 ```json
 {"error": "Could not resolve host: dev.actigraph.fr; nodename nor servname provided, or not known"}
 ```
 
-Le script retournera une erreur 400 si des paramètres sont manquants ou non reconnus.
+Si plus d'informations majeures sur le problème sont disponibles, un message complémentaire sera ajouté :
+
+```json
+{
+	"error": "Service indisponible",
+	"message": "Chers clients, le service \"Prochains passages\" est actuellement indisponible. Nous faisons le maximum pour le rétablir au plus vite. Merci de votre compréhension."
+}
+```
