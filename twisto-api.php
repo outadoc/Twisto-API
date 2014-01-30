@@ -35,13 +35,17 @@
 		));
 
 		$server_output = curl_exec($ch);
+		$network_error_message;
 
 		if($server_output == false) {
 			curl_close($ch);
 			throwError(curl_error($ch));
-		} else if (empty($server_output)) {
+		} else if(empty($server_output)) {
 			curl_close($ch);
 			throwError("Service indisponible");
+		} else if(preg_match_all("/<div class='message reseau bloquant'>\n.+\n<p class='corps_message'>(.+)<\/p>\n<\/div>/", $server_output, $network_error_message)
+			&& $network_error_message[1][0] != null) {
+			throwError("Service indisponible", html_entity_decode($network_error_message[1][0]));
 		}
 
 		curl_close($ch);
@@ -69,6 +73,9 @@
 		} else if (empty($server_output)) {
 			curl_close($ch);
 			throwError("Service indisponible");
+		} else if(preg_match_all("/<div class='message reseau bloquant'>\n.+\n<p class='corps_message'>(.+)<\/p>\n<\/div>/", $server_output, $network_error_message)
+			&& $network_error_message[1][0] != null) {
+			throwError("Service indisponible", html_entity_decode($network_error_message[1][0]));
 		}
 
 		curl_close($ch);
@@ -140,7 +147,7 @@
 					//merge the current cookie's results with the global results
 					$finalSchedules = array_merge($finalSchedules, $scheduleArray);
 				} else {
-					throwError("Erreur de parsing (horaires non trouvée)");
+					throwError("Erreur de parsing (horaires non trouvées)");
 				}
 			} catch(Exception $e) {
 				throwError($e->getMessage());
@@ -175,7 +182,7 @@
 
 				echo html_entity_decode(json_encode($final));
 			} else {
-				throwError("Erreur de parsing (horaires non trouvée)");
+				throwError("Erreur de parsing (horaires non trouvées)");
 			}
 		} catch(Exception $e) {
 			throwError($e->getMessage());
@@ -205,7 +212,7 @@
 				
 				echo html_entity_decode(json_encode($final));
 			} else {
-				throwError("Erreur de parsing (horaires non trouvée)");
+				throwError("Erreur de parsing (horaires non trouvées)");
 			}
 		} catch(Exception $e) {
 			throwError($e->getMessage());
@@ -230,7 +237,7 @@
 
 				echo html_entity_decode(json_encode($final));
 			} else {
-				throwError("Erreur de parsing (horaires non trouvée)");
+				throwError("Erreur de parsing (horaires non trouvées)");
 			}
 		} catch(Exception $e) {
 			throwError($e->getMessage());
@@ -253,13 +260,17 @@
 		}, strtolower($text));
 	}
 
-	function throwError($reason) {
+	function throwError($reason, $message) {
 		//empty output buffer
 		ob_end_clean();
 		header('HTTP/1.1 500 Internal Server Error', true, 500);
 
 		//exiting with an error displayed in a JSON object
-		exit('{"error":"' . $reason . '"}');
+		if($message == null) {
+			exit('{"error":"' . addslashes($reason) . '"}');
+		} else {
+			exit('{"error":"' . addslashes($reason) . '", "message": "' . addslashes($message) . '"}');
+		}
 	}
 
 	//start output buffer
