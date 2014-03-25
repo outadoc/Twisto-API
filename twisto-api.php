@@ -406,7 +406,7 @@
 				$res = getStops($line, $direction);
 				break;
 			default:
-				throwErrorWithHttpCode("Not enough arguments", NULL, "400 Bad Request", 400);
+				throwErrorWithHttpCode("Pas assez d'arguments, RTFM.", NULL, "400 Bad Request", 400);
 				break;
 		}
 
