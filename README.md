@@ -14,7 +14,7 @@ L'API est écrite en PHP et repose sur le système Timeo de Actigraph, disponibl
 
 ## Utilisation
 
-Appelez le script `twisto-api.php` avec différentes variables GET en fonction du résultat souhaité.  
+Appelez le script `twisto-api.php` avec différentes variables GET (ou POST) en fonction du résultat souhaité.  
 Le résultat est renvoyé sous forme d'un string JSON.
 
 ### Lister les lignes de bus/tram
