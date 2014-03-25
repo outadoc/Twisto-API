@@ -20,10 +20,24 @@
 		along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 	*/
 
+	/**
+	 * The base URL of the relais.html.php page, on which we will make the requests.
+	 */
 	define('API_BASE_URL', 'http://dev.actigraph.fr/actipages/twisto/module/mobile/pivk/relais.html.php');
+
+	/**
+	 * The maximum number of stops we can request at a time (depends of the source site).
+	 */
 	define('MAX_COOKIE_COUNT', 4);
 	
-	//this gets a distant page with curl, via GET and with a cookie (it's always better with cookies)
+	/**
+	 * Gets a distant page with curl, via GET and with a cookie (it's always better with cookies).
+	 *
+	 * @param string $fields The GET parameters in the form of an urlencoded string. (foo=bar&bar=foo...)
+	 * @param string $cookie The 'als' cookie that will be sent along with the request.
+	 *
+	 * @return string The raw output from the server.
+	 */
 	function getDistantPage($fields, $cookie) {
 		$ch = curl_init();
 
@@ -40,7 +54,12 @@
 		return $server_output;
 	}
 
-	//this does the same, but for POST method and with no cookies :(
+	/**
+	 * Gets a distant page with curl, via POST.
+	 *
+	 * @param array $fields The POST parameters in the form of a named array.
+	 * @return string The raw output from the server.
+	 */
 	function postDistantPage($fields) {
 		$ch = curl_init();
 
@@ -59,6 +78,12 @@
 		return $server_output;
 	}
 
+	/**
+	 * Checks whether a request to Twisto's website was successful or not.
+	 *
+	 * @param string $server_output The raw server output.
+	 * @param curl $ch The cURL handle.
+	 */
 	function checkServerResult($server_output, $ch) {
 		$network_error_message = array();
 
@@ -77,8 +102,12 @@
 		curl_close($ch);
 	}
 
-	//we already have a cookie containing a list of the lines we want to get schedules for; send it, parse it, return a JSON object with the full schedule.
-	//the cookie is of the form STOP|LINE|DIRECTION;STOP|LINE|DIRECTION;...
+	/**
+	 * Use this function if you already have a cookie containing a list of the lines you want to get schedules for.
+	 * 
+	 * @param string $cookie The raw cookie that will be sent to the website. 
+	 * 	The cookie is of the form STOP|LINE|DIRECTION;STOP|LINE|DIRECTION;...
+	 */
 	function getScheduleFromCookie($cookie) {
 		$tmpCookies = array();
 		$cookiesList = array();
@@ -153,13 +182,23 @@
 		echo html_entity_decode(json_encode($finalSchedules));
 	}
 
-	//this basically is an alias to getScheduleFromCookie that allows us to search for the next buses for a line, direction, stop instead of a raw cookie.
-	//only works for one stop at a time.
+	/** 
+	 * An alias to getScheduleFromCookie that allows us to search for the next buses for a line, direction, stop instead of a raw cookie.
+	 * Only works for one stop at a time.
+	 *
+	 * @param string $line The ID of the line
+	 * @param string $direction The ID of the direction (A or R)
+	 * @param string $stop The ID of the stop
+	 *
+	 * @see getScheduleFromCookie
+	 */
 	function getScheduleFromDetails($line, $direction, $stop) {
 		getScheduleFromCookie($stop . '|' . $line . '|' . $direction);
 	}
 
-	//this returns a list of all the available bus lines
+	/**
+	 * Returns a list of all the available bus lines.
+	 */
 	function getLines() {
 		$content = postDistantPage(null);
 		$lines;
@@ -184,7 +223,11 @@
 		}
 	}
 
-	//this gives us the available directions (A or R) for a specific line
+	/**
+	 * Returns the available directions (A or R) for a specified line.
+	 *
+	 * @param string $line The ID of the line.
+	 */
 	function getDirection($line) {
 		$content = postDistantPage(array("a" => "refresh_list", "ligne" => $line));
 		$directions;
@@ -214,7 +257,12 @@
 		}
 	}
 
-	//this gives the available bus stops for a specific line/direction
+	/**
+	 * Returns the available bus stops for a specified line and direction.
+	 *
+	 * @param string $line The ID of the line.
+	 * @param string $direction The ID of the direction. (A or R)
+	 */
 	function getStops($line, $direction) {
 		$content = postDistantPage(array("a" => "refresh_list", "ligne_sens" => $line . '_' . $direction));
 		$stops;
@@ -239,13 +287,23 @@
 		}
 	}
 
+	/**
+	 * Capitalizes the first letter of every word, like ucwords; except it does it WELL.
+	 * 
+	 * @param string $text The text to capitalize.
+	 * @return string The capitalized text.
+	 */
 	function ucsmart($text) {
-		//this function capitalizes the first letter of every word, like ucwords; except it does it WELL.
+		//these words will never be capitalized
+		$determinants = array('de', 'du', 'des', 'au', 'aux', 'à', 'la', 'le', 'les', 'd');
+		//these words will always be capitalized
+		$specialWords = array('sncf', 'chu', 'chr', 'crous', 'suaps');
+
 		return preg_replace_callback('/([^a-z0-9]|^)([a-z0-9]*)/', function($matches) {
-			if($matches[1] != '' && in_array($matches[2], Array('de', 'du', 'des', 'au', 'aux', 'à', 'la', 'le', 'les', 'd'))) {
+			if($matches[1] != '' && in_array($matches[2], $determinants)) {
 				//if the word is a determinant and is not in the first word of the string, don't capitalize it
 				return $matches[1] . $matches[2];
-			} else if(in_array($matches[2], Array('sncf', 'chu', 'chr'))) {
+			} else if(in_array($matches[2], $specialWords)) {
 				//if the word is an acronym, fully capitalize it
 				return $matches[1] . strtoupper($matches[2]);
 			} else {
@@ -255,10 +313,30 @@
 		}, strtolower($text));
 	}
 
+	/**
+	 * Throws an error and kills the script.
+	 * 
+	 * @param string $reason The reason of the error, in the form of a brief message.
+	 * @param string $message A detailed message about the error (optional).
+	 *
+	 * @see throwError
+	 */
 	function throwError($reason, $message) {
+		throwError($reason, $message, "500 Internal Server Error", 500);
+	}
+
+	/**
+	 * Throws an error and kills the script, specifying the HTTP error code.
+	 * 
+	 * @param string $reason The reason of the error, in the form of a brief message.
+	 * @param string $message A detailed message about the error (optional).
+	 * @param string $httpCodeMessage The HTTP error message.
+	 * @param int $httpCode The HTTP error code.
+	 */
+	function throwErrorWithHttpCode($reason, $message, $httpCodeMessage, $httpCode) {
 		//empty output buffer
 		ob_end_clean();
-		header('HTTP/1.1 500 Internal Server Error', true, 500);
+		header('HTTP/1.1 ' . $httpCodeMessage, true, $httpCode);
 
 		//exiting with an error displayed in a JSON object
 		if($message == null) {
@@ -291,10 +369,7 @@
 		//if we want to list the available bus stops
 		getStops($_GET['line'], $_GET['direction']);
 	} else {
-		ob_end_clean();
-		header('HTTP/1.1 400 Bad Request', true, 400);
-		
-		exit('{"error":"Not enough arguments"}');
+		throwErrorWithHttpCode("Not enough arguments", "400 Bad Request", 400);
 	}
 
 	ob_end_flush();
