@@ -1,7 +1,7 @@
 <?php 
 	/* 
-		Twisto real-time API
-		Copyright (C) outa[dev] 2013-2014
+		Twisto Real-Time API
+		Copyright (C) Baptiste Candellier 2013-2014
 	
 		twisto-api.php
 		
