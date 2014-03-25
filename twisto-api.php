@@ -353,9 +353,9 @@
 
 		//exiting with an error displayed in a JSON object
 		if($message == null) {
-			exit('{"error":"' . addslashes($reason) . '"}');
+			exit('{"error":' . json_encode($reason) . '}');
 		} else {
-			exit('{"error":"' . addslashes($reason) . '", "message": "' . addslashes($message) . '"}');
+			exit('{"error":' . json_encode($reason) . ', "message":' . json_encode($message) . '}');
 		}
 	}
 
