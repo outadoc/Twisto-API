@@ -178,8 +178,7 @@
 			}
 		}
 
-		//display the json results
-		echo html_entity_decode(json_encode($finalSchedules));
+		return $finalSchedules;
 	}
 
 	/** 
@@ -193,7 +192,7 @@
 	 * @see getScheduleFromCookie
 	 */
 	function getScheduleFromDetails($line, $direction, $stop) {
-		getScheduleFromCookie($stop . '|' . $line . '|' . $direction);
+		return getScheduleFromCookie($stop . '|' . $line . '|' . $direction);
 	}
 
 	/**
@@ -214,7 +213,7 @@
 					$final[$i]['name'] = ucsmart($lines[$i][2]);
 				}
 
-				echo html_entity_decode(json_encode($final));
+				return $final;
 			} else {
 				throwError("Erreur lors de l'énumération des lignes");
 			}
@@ -248,7 +247,7 @@
 					$final[1]['name'] = ucsmart(str_replace("\\", '', $directions[1][1]));
 				}
 				
-				echo html_entity_decode(json_encode($final));
+				return $final;
 			} else {
 				throwError("Erreur lors de l'énumération des directions");
 			}
@@ -278,7 +277,7 @@
 					$final[$i]['name'] = ucsmart(str_replace("\\", '', $stops[$i][2]));
 				}
 
-				echo html_entity_decode(json_encode($final));
+				return $final;
 			} else {
 				throwError("Erreur lors de l'énumération des arrêts");
 			}
@@ -294,12 +293,13 @@
 	 * @return string The capitalized text.
 	 */
 	function ucsmart($text) {
-		//these words will never be capitalized
-		$determinants = array('de', 'du', 'des', 'au', 'aux', 'à', 'la', 'le', 'les', 'd');
-		//these words will always be capitalized
-		$specialWords = array('sncf', 'chu', 'chr', 'crous', 'suaps');
-
 		return preg_replace_callback('/([^a-z0-9]|^)([a-z0-9]*)/', function($matches) {
+			
+			//these words will never be capitalized
+			$determinants = array('de', 'du', 'des', 'au', 'aux', 'à', 'la', 'le', 'les', 'd', 'et', 'l');
+			//these words will always be capitalized
+			$specialWords = array('sncf', 'chu', 'chr', 'crous', 'suaps', 'fpa', 'za', 'zi', 'zac', 'cpam', 'efs', 'mjc');
+
 			if($matches[1] != '' && in_array($matches[2], $determinants)) {
 				//if the word is a determinant and is not in the first word of the string, don't capitalize it
 				return $matches[1] . $matches[2];
@@ -319,10 +319,10 @@
 	 * @param string $reason The reason of the error, in the form of a brief message.
 	 * @param string $message A detailed message about the error (optional).
 	 *
-	 * @see throwError
+	 * @see throwErrorWithHttpCode
 	 */
 	function throwError($reason, $message) {
-		throwError($reason, $message, "500 Internal Server Error", 500);
+		throwErrorWithHttpCode($reason, $message, "500 Internal Server Error", 500);
 	}
 
 	/**
@@ -346,32 +346,57 @@
 		}
 	}
 
-	//start output buffer
-	ob_start();
-	
-	//check what we want to get
-	//if we want the full schedule
-	if($_GET['func'] == "getSchedule") {
-		if(isset($_GET['data'])) {
-			//if we already have a formed cookie
-			getScheduleFromCookie($_GET['data']);
-		} else if(isset($_GET['line']) && isset($_GET['direction']) && isset($_GET['stop'])) {
-			//else, if we're specifying line, direction and stop of the desired schedule
-			getScheduleFromDetails($_GET['line'], $_GET['direction'], $_GET['stop']);
-		}
-	} else if($_GET['func'] == "getLines") {
-		//if we want to list the available lines
-		getLines();
-	} else if($_GET['func'] == "getDirections" && isset($_GET['line'])) {
-		//if we want to list the available directions
-		getDirection($_GET['line']);
-	} else if($_GET['func'] == "getStops" && isset($_GET['line']) && isset($_GET['direction'])) {
-		//if we want to list the available bus stops
-		getStops($_GET['line'], $_GET['direction']);
-	} else {
-		throwErrorWithHttpCode("Not enough arguments", "400 Bad Request", 400);
+	function getVar($var) {
+		return isset($_GET[$var]) ? $_GET[$var] : $_POST[$var];
 	}
 
+	function processAndDisplayURLRequest() {
+		$func = getVar('func');
+		$line = getVar('line');
+		$direction = getVar('direction');
+		$stop = getVar('stop');
+		$data = getVar('data');
+
+		$res;
+
+		//check what we want to get and process
+		switch ($func) {
+			case 'getSchedule':
+				if($data != NULL) {
+					//if we already have a nice, tasty cookie
+					$res = getScheduleFromCookie($_GET['data']);
+				} else if($line != NULL && $direction != NULL && $stop != NULL) {
+					//else, if we're specifying line, direction and stop of the desired schedule
+					$res = getScheduleFromDetails($_GET['line'], $_GET['direction'], $_GET['stop']);
+				}
+
+				break;
+			case 'getLines':
+				//if we want to list the available lines
+				$res = getLines();
+				break;
+			case 'getDirections':
+				//if we want to list the available directions
+				$res = getDirection($line);
+				break;
+			case 'getStops':
+				//if we want to list the available bus stops
+				$res = getStops($line, $direction);
+				break;
+			default:
+				throwErrorWithHttpCode("Not enough arguments", NULL, "400 Bad Request", 400);
+				break;
+		}
+
+		if(!empty($res)) {
+			//display the result of the request
+			echo html_entity_decode(json_encode($res));
+		}
+	}
+
+	//start output buffer
+	ob_start();
+	processAndDisplayURLRequest();
 	ob_end_flush();
 
 ?>
