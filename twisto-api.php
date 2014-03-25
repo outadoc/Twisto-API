@@ -1,7 +1,7 @@
 <?php 
 	/* 
 		Twisto real-time API
-		Copyright (C) outa[dev] 2013
+		Copyright (C) outa[dev] 2013-2014
 	
 		twisto-api.php
 		
@@ -107,6 +107,10 @@
 	 * 
 	 * @param string $cookie The raw cookie that will be sent to the website. 
 	 * 	The cookie is of the form STOP|LINE|DIRECTION;STOP|LINE|DIRECTION;...
+	 *
+	 * @return array An array of schedules corresponding to the input. 
+	 * Note : there will never be more schedules in the output than there 
+	 * were stops in the input, but there may be less, if no valid data could be fetched for one or several stops.
 	 */
 	function getScheduleFromCookie($cookie) {
 		$tmpCookies = array();
@@ -188,6 +192,8 @@
 	 * @param string $line The ID of the line
 	 * @param string $direction The ID of the direction (A or R)
 	 * @param string $stop The ID of the stop
+	 * 
+	 * @return array An array containing one schedule, that corresponds to the specified stop.
 	 *
 	 * @see getScheduleFromCookie
 	 */
@@ -197,6 +203,8 @@
 
 	/**
 	 * Returns a list of all the available bus lines.
+	 *
+	 * @return array An array containing a list of all the bus lines available in the API.
 	 */
 	function getLines() {
 		$content = postDistantPage(null);
@@ -226,6 +234,7 @@
 	 * Returns the available directions (A or R) for a specified line.
 	 *
 	 * @param string $line The ID of the line.
+	 * @return array An array containing the available directions for this line. (usually A and R, may only be A)
 	 */
 	function getDirection($line) {
 		$content = postDistantPage(array("a" => "refresh_list", "ligne" => $line));
@@ -261,6 +270,8 @@
 	 *
 	 * @param string $line The ID of the line.
 	 * @param string $direction The ID of the direction. (A or R)
+	 *
+	 * @return array An array containing all the stops corresponding to the given line and direction.
 	 */
 	function getStops($line, $direction) {
 		$content = postDistantPage(array("a" => "refresh_list", "ligne_sens" => $line . '_' . $direction));
@@ -332,6 +343,8 @@
 	 * @param string $message A detailed message about the error (optional).
 	 * @param string $httpCodeMessage The HTTP error message.
 	 * @param int $httpCode The HTTP error code.
+	 *
+	 * @see throwError
 	 */
 	function throwErrorWithHttpCode($reason, $message, $httpCodeMessage, $httpCode) {
 		//empty output buffer
@@ -346,10 +359,19 @@
 		}
 	}
 
+	/**
+	 * Gets a GET or POST variable.
+	 * 
+	 * @param string $var The name of the parameter.
+	 * @return mixed If $_GET[$var] was set : returns the GET variable with this name, else, returns the POST variable.
+	 */
 	function getVar($var) {
 		return isset($_GET[$var]) ? $_GET[$var] : $_POST[$var];
 	}
 
+	/**
+	 * Main function: processes the data requested.
+	 */
 	function processAndDisplayURLRequest() {
 		$func = getVar('func');
 		$line = getVar('line');
@@ -394,7 +416,7 @@
 		}
 	}
 
-	//start output buffer
+	//start output buffer, process, and flush
 	ob_start();
 	processAndDisplayURLRequest();
 	ob_end_flush();
