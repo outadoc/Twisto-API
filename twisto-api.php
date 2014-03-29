@@ -386,10 +386,10 @@
 			case 'getSchedule':
 				if($data != NULL) {
 					//if we already have a nice, tasty cookie
-					$res = getScheduleFromCookie($_GET['data']);
+					$res = getScheduleFromCookie($data);
 				} else if($line != NULL && $direction != NULL && $stop != NULL) {
 					//else, if we're specifying line, direction and stop of the desired schedule
-					$res = getScheduleFromDetails($_GET['line'], $_GET['direction'], $_GET['stop']);
+					$res = getScheduleFromDetails($line, $direction, $stop);
 				}
 
 				break;
