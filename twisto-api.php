@@ -29,6 +29,9 @@
 	 * The maximum number of stops we can request at a time (depends of the source site).
 	 */
 	define('MAX_COOKIE_COUNT', 4);
+
+	define('CACHE_DIRECTORY', 'cache/');
+	define('CACHE_DURATION', 3 * 60 * 60);
 	
 	/**
 	 * Gets a distant page with curl, via GET and with a cookie (it's always better with cookies).
@@ -369,6 +372,21 @@
 		return isset($_GET[$var]) ? $_GET[$var] : $_POST[$var];
 	}
 
+	function saveCache($category, $content) {
+		file_put_contents(CACHE_DIRECTORY . $category, $content);
+	}
+
+	function getCache($category) {
+		$category = str_replace("/", "", $category);
+
+		if(!file_exists(CACHE_DIRECTORY . $category) 
+			|| (filemtime(CACHE_DIRECTORY . $category) + CACHE_DURATION) < date_timestamp_get(date_create())) {
+			return false;
+		}
+
+		return stripslashes(file_get_contents(CACHE_DIRECTORY . $category));
+	}
+
 	/**
 	 * Main function: processes the data requested.
 	 */
@@ -379,41 +397,57 @@
 		$stop = getVar('stop');
 		$data = getVar('data');
 
-		$res;
+		$res = "";
 
-		//check what we want to get and process
-		switch ($func) {
-			case 'getSchedule':
-				if($data != NULL) {
-					//if we already have a nice, tasty cookie
-					$res = getScheduleFromCookie($data);
-				} else if($line != NULL && $direction != NULL && $stop != NULL) {
-					//else, if we're specifying line, direction and stop of the desired schedule
-					$res = getScheduleFromDetails($line, $direction, $stop);
-				}
+		//check for cache
+		if($func == 'getLines' && $cache = getCache('lines')
+			|| $func == 'getDirections' && $cache = getCache('directions_' . $line)
+			|| $func == 'getStops' && $cache = getCache('stops_' . $line . '_' . $direction)) {
+			//if there's cache available, display it
+			echo $cache;
+		} else {
+			//if no cache is available
+			//check what we want to get and process
+			switch ($func) {
+				case 'getSchedule':
+					if($data != NULL) {
+						//if we already have a nice, tasty cookie
+						$res = getScheduleFromCookie($data);
+					} else if($line != NULL && $direction != NULL && $stop != NULL) {
+						//else, if we're specifying line, direction and stop of the desired schedule
+						$res = getScheduleFromDetails($line, $direction, $stop);
+					}
 
-				break;
-			case 'getLines':
-				//if we want to list the available lines
-				$res = getLines();
-				break;
-			case 'getDirections':
-				//if we want to list the available directions
-				$res = getDirection($line);
-				break;
-			case 'getStops':
-				//if we want to list the available bus stops
-				$res = getStops($line, $direction);
-				break;
-			default:
-				throwErrorWithHttpCode("Pas assez d'arguments, RTFM.", NULL, "400 Bad Request", 400);
-				break;
+					break;
+				case 'getLines':
+					//if we want to list the available lines
+					$res = getLines();
+
+					saveCache('lines', html_entity_decode(json_encode($res)));
+					break;
+				case 'getDirections':
+					//if we want to list the available directions
+					$res = getDirection($line);
+
+					saveCache('directions_' . $line, html_entity_decode(json_encode($res)));
+					break;
+				case 'getStops':
+					//if we want to list the available bus stops
+					$res = getStops($line, $direction);
+
+					saveCache('stops_' . $line . '_' . $direction, html_entity_decode(json_encode($res)));
+					break;
+				default:
+					throwErrorWithHttpCode("Pas assez d'arguments, RTFM.", NULL, "400 Bad Request", 400);
+					break;
+			}
+
+			if(!empty($res)) {
+				//display the result of the request
+				echo html_entity_decode(json_encode($res));
+			}
 		}
-
-		if(!empty($res)) {
-			//display the result of the request
-			echo html_entity_decode(json_encode($res));
-		}
+		
 	}
 
 	//start output buffer, process, and flush
