@@ -385,7 +385,8 @@
 	 * Returns the content of a cache file if available and relevant.
 	 * 
 	 * @param string $category The name of the cache file.
-	 * @return mixed If the cache isn't available, return false. Else, return the cached JSON response.
+	 * @param string &$content The variable in which the cache will be saved if available.
+	 * @return boolean True if and only if the cache is retrievable.
 	 */
 	function getCache($category, &$content) {
 		$category = str_replace("/", "", $category);
