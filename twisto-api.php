@@ -373,7 +373,7 @@
 	}
 
 	function saveCache($category, $content) {
-		file_put_contents(CACHE_DIRECTORY . $category, $content);
+		@file_put_contents(CACHE_DIRECTORY . $category, $content);
 	}
 
 	function getCache($category) {
@@ -452,6 +452,7 @@
 
 	//start output buffer, process, and flush
 	ob_start();
+	error_reporting(0);
 	processAndDisplayURLRequest();
 	ob_end_flush();
 
