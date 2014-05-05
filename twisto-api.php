@@ -372,19 +372,31 @@
 		return isset($_GET[$var]) ? $_GET[$var] : $_POST[$var];
 	}
 
+	/**
+	 * Saves a JSON response to a file.
+	 * 
+	 * @param string $category The name of the cache file.
+	 */
 	function saveCache($category, $content) {
 		@file_put_contents(CACHE_DIRECTORY . $category, $content);
 	}
 
-	function getCache($category) {
+	/**
+	 * Returns the content of a cache file if available and relevant.
+	 * 
+	 * @param string $category The name of the cache file.
+	 * @return mixed If the cache isn't available, return false. Else, return the cached JSON response.
+	 */
+	function getCache($category, &$content) {
 		$category = str_replace("/", "", $category);
 
 		if(!file_exists(CACHE_DIRECTORY . $category) 
 			|| (filemtime(CACHE_DIRECTORY . $category) + CACHE_DURATION) < date_timestamp_get(date_create())) {
 			return false;
+		} else {
+			$content = stripslashes(file_get_contents(CACHE_DIRECTORY . $category));
+			return true;
 		}
-
-		return stripslashes(file_get_contents(CACHE_DIRECTORY . $category));
 	}
 
 	/**
@@ -398,11 +410,12 @@
 		$data = getVar('data');
 
 		$res = "";
+		$cache = "";
 
 		//check for cache
-		if($func == 'getLines' && $cache = getCache('lines')
-			|| $func == 'getDirections' && $cache = getCache('directions_' . $line)
-			|| $func == 'getStops' && $cache = getCache('stops_' . $line . '_' . $direction)) {
+		if($func == 'getLines' && getCache('lines', $cache)
+			|| $func == 'getDirections' && getCache('directions_' . $line, $cache)
+			|| $func == 'getStops' && getCache('stops_' . $line . '_' . $direction, $cache)) {
 			//if there's cache available, display it
 			echo $cache;
 		} else {
