@@ -30,6 +30,7 @@
 	 */
 	define('MAX_COOKIE_COUNT', 4);
 
+	define('MAX_STOPS_COUNT', 50);
 	define('CACHE_DIRECTORY', 'cache/');
 	define('CACHE_DURATION', 3 * 60 * 60);
 	
@@ -122,6 +123,10 @@
 
 		preg_match_all("/(([0-9]+)\|([0-9a-zA-Z]+)\|(A|R))/", $cookie, $tmpCookies);
 		$tmpCookies = $tmpCookies[0];
+
+		if(count($tmpCookies) > MAX_STOPS_COUNT) {
+			throwError("Trop d'arrêts demandés (maximum : " . MAX_STOPS_COUNT . ")");
+		}
 
 		//twisto's website will only allow us to request for four bus stops at a time, max.
 		//what we're doing here to get around that, is we're splitting our eventually massive request into smaller requests
