@@ -96,10 +96,10 @@
 		} else if (empty($server_output)) {
 			curl_close($ch);
 			throwError("Service indisponible");
-		} else if(preg_match_all("/<div class='message reseau bloquant'>\n.+\n<p class='corps_message'>(.+)<\/p>\n<\/div>/", $server_output, $network_error_message)
-			&& $network_error_message[1][0] != null) {
+		} else if(preg_match_all("/<div class=(\"|')message reseau bloquant(\"|')>\n.+\n<p class=(\"|')corps_message(\"|')>(.+)<\/p>\n<\/div>/", $server_output, $network_error_message)
+			&& $network_error_message[5][0] != null) {
 			curl_close($ch);
-			throwError("Service indisponible", html_entity_decode($network_error_message[1][0]));
+			throwError("Service indisponible", html_entity_decode($network_error_message[5][0]));
 		}
 
 		curl_close($ch);
@@ -215,13 +215,13 @@
 		$final = array();
 
 		try {
-			//returns a piece of HTML: parse it to only get insteresting info
-			preg_match_all("/<option value='([a-zA-Z0-9]+)'>([a-zA-Z0-9\/\.\- ]+)<\/option>/", $content, $lines, PREG_SET_ORDER);
+			//returns a piece of HTML: parse it to only get the interesting info
+			preg_match_all("/<option value=(\"|')([a-zA-Z0-9]+)(\"|')>([a-zA-Z0-9\/\.\- ]+)<\/option>/", $content, $lines, PREG_SET_ORDER);
 
 			if($lines != null) {
 				for($i = 0; $i < count($lines); $i++) {
-					$final[$i]['id'] = $lines[$i][1];
-					$final[$i]['name'] = ucsmart($lines[$i][2]);
+					$final[$i]['id'] = $lines[$i][2];
+					$final[$i]['name'] = ucsmart($lines[$i][4]);
 				}
 
 				return $final;
