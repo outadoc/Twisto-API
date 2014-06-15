@@ -151,44 +151,54 @@
 			//get page using our current cookie
 			$content = getDistantPage("a=refresh&borne=affiche_borne&ran=1", $cookiesList[$i]);
 			
-			$scheduleStr = null;
-			$scheduleArray = array();
+			$regexMatches = null;
+			$currentStopsSchedulesArray = array();
 
 			try {
 				//a custom style is used when buses are passing now: remove those 
 				$content = preg_replace("/<blink style='color:red'>([a-zA-Z0-9]+)<\/blink>/", "$1", $content);
 
-				$regex = "/timeo_ligne_nom'>([a-zA-Z0-9- ']+).+timeo_titre_direction'>([a-zA-Z0-9-\.\- ']+).+timeo_titre_arret'>Arr&ecirc;t&nbsp;([a-zA-Z0-9&;\.\/ '\-]+)<\/span><\/div>\n<div class='bloc_message'>\n(<div class='message ligne non_bloquant'>\n<p class='titre_message'>(.+)<\/p>\n<p class='corps_message'>([^<]*?(\n))+[^<]*?<\/p>\n<\/div>\n)?<\/div>\n<span class='timeo_titre_arret'>Prochains passages :<\/span><ul>\n((\s<li id='h[0-9]' class='timeo_horaire'>[a-zA-Z0-9&;\. '\-]+<\/li>\n)*)/";
-				preg_match_all($regex, $content, $scheduleStr, PREG_SET_ORDER);
+				//match all the stops, with their line, direction, name, schedules, and possible traffic messages
+				$regex_name = "timeo_ligne_nom'>([a-zA-Z0-9- ']+).+";
+				$regex_direction = "timeo_titre_direction'>([a-zA-Z0-9-\.\- ']+).+";
+				$regex_stop = "timeo_titre_arret'>Arr&ecirc;t&nbsp;([a-zA-Z0-9&;\.\/ '\-]+)";
+				$regex_message = "(<div class='message ligne non_bloquant'>\n<p class='titre_message'>(.+)<\/p>\n<p class='corps_message'>([^<]*?(\n))+[^<]*?<\/p>\n<\/div>\n)?";
+				$regex_schedules = "((\s<li id='h[0-9]' class='timeo_horaire'>[a-zA-Z0-9&;\. '\-]+<\/li>\n)*)";
+
+				$regex = "/" . $regex_name . $regex_direction . $regex_stop . "<\/span><\/div>\n<div class='bloc_message'>\n" . $regex_message . "<\/div>\n<span class='timeo_titre_arret'>Prochains passages :<\/span><ul>\n" . $regex_schedules . "/";
+				preg_match_all($regex, $content, $regexMatches, PREG_SET_ORDER);
 
 				//if we could parse the page
-				if($scheduleStr != null) {
-					for($j = 0; $j < count($scheduleStr); $j++) {
+				if($regexMatches != null) {
+					for($j = 0; $j < count($regexMatches); $j++) {
 						//for each bus stop, get and save its information
-						$scheduleArray[$j]['line'] = ucsmart($scheduleStr[$j][1]);
-						$scheduleArray[$j]['direction'] = ucsmart($scheduleStr[$j][2]);
-						$scheduleArray[$j]['stop'] = ucsmart($scheduleStr[$j][3]);
+						$currentStopsSchedulesArray[$j]['line'] = ucsmart($regexMatches[$j][1]);
+						$currentStopsSchedulesArray[$j]['direction'] = ucsmart($regexMatches[$j][2]);
+						$currentStopsSchedulesArray[$j]['stop'] = ucsmart($regexMatches[$j][3]);
 
 						//match the next buses schedules
-						preg_match_all("/<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&;\.\- ]+)<\/li>/", $scheduleStr[$j][8], $scheduleStr[$j][8]);
+						preg_match_all("/<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&;\.\- ]+)<\/li>/", $regexMatches[$j][8], $regexMatches[$j][8]);
 						
 						//if there are any schedules, save them
-						if($scheduleStr[$j][8][1] != null) {
-							$scheduleArray[$j]['next'] = preg_replace("/([a-zA-Z0-9&;\. '\-]+) vers (A|B) [A-Z0-9&;\. '\-]+/", "Ligne $2 : $1", $scheduleStr[$j][8][1]);
+						if($regexMatches[$j][8][1] != null) {
+							//reformat the direction for the tramway; it's more convenient like this
+							$currentStopsSchedulesArray[$j]['next'] = preg_replace("/([a-zA-Z0-9&;\. '\-]+) vers (A|B) [A-Z0-9&;\. '\-]+/", "Ligne $2 : $1", $regexMatches[$j][8][1]);
 						} else {
-							$scheduleArray[$j]['next'] = array("Pas de passage prévu");
+							//if there are no schedules, just say it
+							$currentStopsSchedulesArray[$j]['next'] = array("Pas de passage prévu");
 						}
 
-						if(!empty($scheduleStr[$j][5]) && !empty($scheduleStr[$j][6])) {
-							$scheduleArray[$j]['message']['title'] = $scheduleStr[$j][5];
-							$scheduleArray[$j]['message']['body'] = $scheduleStr[$j][6];
+						//add traffic messages if necessary
+						if(!empty($regexMatches[$j][5]) && !empty($regexMatches[$j][6])) {
+							$currentStopsSchedulesArray[$j]['message']['title'] = $regexMatches[$j][5];
+							$currentStopsSchedulesArray[$j]['message']['body'] = $regexMatches[$j][6];
 						}
 					}
 
 					//merge the current cookie's results with the global results
-					$finalSchedules = array_merge($finalSchedules, $scheduleArray);
+					$finalSchedules = array_merge($finalSchedules, $currentStopsSchedulesArray);
 				} else {
-					//throwError("Erreur lors de la récupération des horaires");
+					throwError("Erreur lors de la récupération des horaires");
 				}
 			} catch(Exception $e) {
 				throwError($e->getMessage());
