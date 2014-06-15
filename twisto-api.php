@@ -157,10 +157,10 @@
 			try {
 				//a custom style is used when buses are passing now: remove those 
 				$content = preg_replace("/<blink style='color:red'>([a-zA-Z0-9]+)<\/blink>/", "$1", $content);
-				
-				$regex = "/timeo_ligne_nom'>([a-zA-Z0-9- ']+).+timeo_titre_direction'>([a-zA-Z0-9-\.\- ']+).+timeo_titre_arret'>Arr&ecirc;t&nbsp;([a-zA-Z0-9&;\.\/ '\-]+).+\n.+\n.+\n.+\n((\s<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&;\. '\-]+)<\/li>\n)*)/";
+
+				$regex = "/timeo_ligne_nom'>([a-zA-Z0-9- ']+).+timeo_titre_direction'>([a-zA-Z0-9-\.\- ']+).+timeo_titre_arret'>Arr&ecirc;t&nbsp;([a-zA-Z0-9&;\.\/ '\-]+)<\/span><\/div>\n<div class='bloc_message'>\n(<div class='message ligne non_bloquant'>\n<p class='titre_message'>(.+)<\/p>\n<p class='corps_message'>([^<]*?(\n))+[^<]*?<\/p>\n<\/div>\n)?<\/div>\n<span class='timeo_titre_arret'>Prochains passages :<\/span><ul>\n((\s<li id='h[0-9]' class='timeo_horaire'>[a-zA-Z0-9&;\. '\-]+<\/li>\n)*)/";
 				preg_match_all($regex, $content, $scheduleStr, PREG_SET_ORDER);
-				
+
 				//if we could parse the page
 				if($scheduleStr != null) {
 					for($j = 0; $j < count($scheduleStr); $j++) {
@@ -170,20 +170,25 @@
 						$scheduleArray[$j]['stop'] = ucsmart($scheduleStr[$j][3]);
 
 						//match the next buses schedules
-						preg_match_all("/<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&;\.\- ]+)<\/li>/", $scheduleStr[$j][4], $scheduleStr[$j][4]);
+						preg_match_all("/<li id='h[0-9]' class='timeo_horaire'>([a-zA-Z0-9&;\.\- ]+)<\/li>/", $scheduleStr[$j][8], $scheduleStr[$j][8]);
 						
 						//if there are any schedules, save them
-						if($scheduleStr[$j][4][1] != null) {
-							$scheduleArray[$j]['next'] = preg_replace("/([a-zA-Z0-9&;\. '\-]+) vers (A|B) [A-Z0-9&;\. '\-]+/", "Ligne $2 : $1", $scheduleStr[$j][4][1]);
+						if($scheduleStr[$j][8][1] != null) {
+							$scheduleArray[$j]['next'] = preg_replace("/([a-zA-Z0-9&;\. '\-]+) vers (A|B) [A-Z0-9&;\. '\-]+/", "Ligne $2 : $1", $scheduleStr[$j][8][1]);
 						} else {
 							$scheduleArray[$j]['next'] = array("Pas de passage prévu");
+						}
+
+						if(!empty($scheduleStr[$j][5]) && !empty($scheduleStr[$j][6])) {
+							$scheduleArray[$j]['message']['title'] = $scheduleStr[$j][5];
+							$scheduleArray[$j]['message']['body'] = $scheduleStr[$j][6];
 						}
 					}
 
 					//merge the current cookie's results with the global results
 					$finalSchedules = array_merge($finalSchedules, $scheduleArray);
 				} else {
-					throwError("Erreur lors de la récupération des horaires");
+					//throwError("Erreur lors de la récupération des horaires");
 				}
 			} catch(Exception $e) {
 				throwError($e->getMessage());
@@ -472,6 +477,7 @@
 	//start output buffer, process, and flush
 	ob_start();
 	error_reporting(0);
+	header("Content-Encoding: UTF-8");
 	processAndDisplayURLRequest();
 	ob_end_flush();
 
