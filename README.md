@@ -1,5 +1,9 @@
 # Twisto/Timeo Real-time API
 
+## Mise en garde
+
+Cette API n'est plus franchement utile depuis que j'ai découvert l'existence de l'[API officielle un peu cachée](https://gist.github.com/outadoc/40060db45c436977a912). Utilisez-la de préférence, l'API non-officielle de ce repo ne sera plus mise à jour.
+
 ## Introduction
 
 Le réseau Twisto est le réseau de bus et tram de la ville de Caen, géré par Viacités. Malheureusement, ce syndicat ne propose pas d'API pour accéder à ses services qui se vantent pourtant d'être disponibles sur un maximum d'appareils possible.
